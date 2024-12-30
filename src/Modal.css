@@ -1,0 +1,52 @@
+.modal-backdrop.custom-backdrop {
+  --bs-backdrop-zindex: 1050;
+  --bs-backdrop-bg: rgba(237, 241, 241, 0.5);
+  --bs-backdrop-opacity: 0.5;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--bs-backdrop-zindex);
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--bs-backdrop-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.modal-contentert {
+  background: #FCFCFF;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  width: 90%;
+  max-width: 400px;
+  height: 300px;
+  border: 1px solid rgb(208, 208, 208);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-contentert p {
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.modal-contentert button {
+  padding: 5px 20px;
+  background: #12913b;
+  width: 200px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.modal-contentert button:hover {
+  background: #1b7c9b;
+}

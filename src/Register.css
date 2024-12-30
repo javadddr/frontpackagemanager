@@ -1,0 +1,223 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+html, body {
+  margin: 0;
+  padding: 0;
+ 
+}
+
+
+.register-main{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('./bc1.jpg'); /* Adjust with the correct path */
+  background-size: cover;
+  background-position: 100% 10%; /* Manual positioning */
+  position: relative;
+
+}
+.register-main::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  filter: blur(18px); /* Adjust the blur intensity as needed */
+  z-index: -1;
+}
+.form-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px;
+
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
+  width: 350px;
+  max-width: 100%;
+  height: 550px; /* Ensures it doesn't overflow the viewport */
+  background-color: rgba(252, 251, 250, 0.15); /* Slightly transparent to see the blur effect */
+  z-index: 1;
+  border: 1px solid rgb(217, 217, 217);
+  font-size: 13px;
+
+}
+
+.alert-enter {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
+}
+
+.alert-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.alert-exit {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
+}
+.fixed-image {
+  position: fixed;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 30%;
+
+  z-index: 500;
+  height: 125vh;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.alert-exit-active {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 2; 
+  width:410px ;
+}
+
+.register-form h2 {
+  margin-bottom: 30px;
+  color: #1c0da1;
+  font-size:22px ;
+  margin-top: 10px;
+  text-align: center;
+  font-family:'inter','Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.register-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 15px;
+  margin-left: 16%;
+  opacity: 0.9;
+  font-family:'Roboto','Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.register-form input {
+  width: 70%;
+  padding: 0.45rem;
+  margin-bottom: 1rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgb(185, 183, 183);
+  border-radius: 2px;
+  color: #040404;
+  font-size: 15px;
+  margin-left: 65px;
+
+}
+
+.register-form button {
+  width: 107%;
+  padding: 0.75rem 0;
+  background-color: #23a6d5;
+  border: none;
+  border-radius: 8px;
+  color: #030303;
+  
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  font-size: 1.3rem;
+  margin-top: 30px;
+  font-family:'Poppins','Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif ;
+}
+
+.register-form button:hover {
+  transform: translateY(-0.5px);
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 18px 50px -10px;
+}
+
+.register-form a {
+  color: #100f0f;
+  text-decoration: none;
+ 
+  text-align: center;
+
+  font-family:'Poppins','Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+.form-footer span{
+  color: #120ee5;
+}
+.form-footer span:hover{
+  text-decoration: underline;
+}
+.form-footer{
+  margin-top: 10px;
+  text-align: center;
+}
+.register-form button:disabled {
+  background-color: #ccc; 
+  cursor: not-allowed;
+}
+
+
+
+
+.company-info{
+  margin-top: 30px;
+
+  left: 35%;
+  top: 85%;
+  font-size: 12px;
+  text-align: center;
+}
+
+.company-info a {
+  color: #2f0697;
+  text-decoration: none;
+font-weight: 600;
+  text-align: center;
+  margin-top: 20px;
+  font-family:'Poppins','Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+@media (max-width: 768px) {
+  .company-info {
+    position: fixed;
+    left: 50%;
+    top: 83%;
+    font-size: 10px;
+    transform: translateX(-50%); /* Center horizontally */
+  }
+}
+
+@media (max-width: 480px) {
+  .company-info {
+    position: fixed;
+    left: 50%;
+    top: 83%;
+    font-size: 8px;
+    transform: translateX(-50%); /* Center horizontally */
+  }
+  .register-main {
+    justify-content:flex-start;
+    margin-top: 20px;
+  }
+}
+
+#signInDiv{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 100%;
+  min-width:  100%;
+
+  border-radius: 5px;
+
+}
