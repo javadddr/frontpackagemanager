@@ -1,4 +1,5 @@
 import { nextui } from "@nextui-org/react";
+import tailwindcssAnimate from "tailwindcss-animate"; 
 /** @type {import('tailwindcss').Config} */
 
 export default {
@@ -64,6 +65,6 @@ export default {
   	}
   },
   darkMode: ["class", "class"],
-  plugins: [nextui(), require("tailwindcss-animate")]
+  plugins: [nextui(), tailwindcssAnimate],
 }
 
