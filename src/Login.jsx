@@ -290,9 +290,9 @@ const Login = () => {
   className="max-w-xs mt-0  "
 />
                  <p className="text-center text-sm">
-                    Already have an account?{" "}
-                    <Link to="/login" className="text-blue-600 cursor-pointer">
-                      Login
+                    Do not have an account?{" "}
+                    <Link to="/register" className="text-blue-600 cursor-pointer">
+                      Register
                     </Link>
                   </p>
 
