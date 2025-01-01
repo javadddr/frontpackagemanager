@@ -46,7 +46,7 @@ const [selectedHub, setSelectedHub] = useState("all");
 const [hubOptions, setHubOptions] = useState(["all"]);
 const [totalAverageTransitTime, setTotalAverageTransitTime] = useState(0);
 
-
+console.log("hubOptions",hubOptions)
 useEffect(() => {
   const allBackendShipments = [...backendShipments, ...backendShipments1, ...backendShipments2];
   
@@ -202,12 +202,17 @@ const filteredData = chartData.filter((item) => {
         <SelectValue placeholder="All Hubs" />
       </SelectTrigger>
       <SelectContent className="rounded-xl">
-        {hubOptions.map(hub => (
-          <SelectItem key={hub} value={hub} className="rounded-lg">
-            {hub === "all" ? "All Hubs" : hub}
-          </SelectItem>
-        ))}
-      </SelectContent>
+  {hubOptions.map((hub, index) => (
+    <SelectItem 
+      key={`${hub || 'null'}-${index}`} 
+      value={hub || 'unknown'} 
+      className="rounded-lg"
+    >
+      {hub === "all" ? "All Hubs" : hub || "Unknown Hub"}
+    </SelectItem>
+  ))}
+</SelectContent>
+
     </Select>
   </div>
 </CardHeader>

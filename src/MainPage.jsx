@@ -3,6 +3,10 @@ import { LuPackageCheck, LuPackageX } from "react-icons/lu";
 import { TbPackages } from "react-icons/tb";
 import { GrMapLocation } from "react-icons/gr";
 import Loading from "./Loading";
+import logocompany  from "./dynamologo1.png"
+import { IoMdLogOut } from "react-icons/io";
+import { GrCapacity } from "react-icons/gr";
+import { MdOutlineContactMail } from "react-icons/md";
 import {
   DesktopOutlined,
   FileOutlined,
@@ -24,30 +28,8 @@ import VenReturn from "./VenReturn";
 import { useHubs } from "./HubsContext";
 const { Header, Content, Footer, Sider } = Layout;
 import TestForm from "../Tesform";
-const menuItems = [
-  { label: "Dashboard", key: "1", icon: <PieChartOutlined style={{ fontSize: "26px" }} /> },
-  { label: "Shipping", key: "2", icon: <LuPackageCheck style={{ fontSize: "26px" }} /> },
- {
-  label: "Returns",
-  key: "3",
-  icon: <LuPackageX style={{ fontSize: "26px" }} />,
-  children: [
-    { label: "From Customer", key: "3-1" },
-    { label: "From Vendors", key: "3-2" },
-  ],
-},
-  { label: "Inventory", key: "4", icon: <TbPackages style={{ fontSize: "26px" }} /> },
-  {
-    label: "Locations",
-    key: "5",
-    icon: <GrMapLocation style={{ fontSize: "26px" }} />,
-    children: [
-      { label: "Hubs", key: "5-1" },
-      { label: "Vendors", key: "5-2" },
-      { label: "Customers", key: "5-3" },
-    ],
-  },
-];
+
+
 
 const MainPage = () => {
   const [userData, setUserData] = useState(null);
@@ -70,7 +52,33 @@ const MainPage = () => {
     incoming: {},
     remaining: {}
   });
-
+  const menuItems = [
+    { label: "Dashboard", key: "1", icon: <PieChartOutlined style={{ fontSize: "26px" }} /> },
+    { label: "Shipping", key: "2", icon: <LuPackageCheck style={{ fontSize: "26px" }} /> },
+   {
+    label: "Returns",
+    key: "3",
+    icon: <LuPackageX style={{ fontSize: "26px" }} />,
+    children: [
+      { label: "From Customer", key: "3-1" },
+      { label: "From Vendors", key: "3-2" },
+    ],
+  },
+    { label: "Inventory", key: "4", icon: <TbPackages style={{ fontSize: "26px" }} /> },
+    {
+      label: "Locations",
+      key: "5",
+      icon: <GrMapLocation style={{ fontSize: "26px" }} />,
+      children: [
+        { label: "Hubs", key: "5-1" },
+        { label: "Vendors", key: "5-2" },
+        { label: "Customers", key: "5-3" },
+      ],
+    },
+    { label: `Capacity: ${userData?.capacity || 0}`, key: "6" ,style: { backgroundColor: "#12A150",color:"black",fontSize:"14px",marginTop:"370px",height:"25px",textAlign:"start" }, icon: <GrCapacity style={{ fontSize: "19px" }} /> },
+    { label: "Contact us", key: "7",style: { backgroundColor: "#09AACD",color:"black",fontSize:"14px" ,height:"25px",textAlign:"start"}, icon: <MdOutlineContactMail style={{ fontSize: "19px" }} /> },
+    { label: "Log out", key: "8",style: { backgroundColor: "#936316",color:"black",fontSize:"14px" ,height:"25px",textAlign:"start"}, icon: <IoMdLogOut style={{ fontSize: "19px" }} /> },
+  ];
   // Define getNameById as a standalone function
   const getNameById = (array, id) => {
     if (!id) return 'N/A';
@@ -158,8 +166,38 @@ useEffect(() => {
   } = theme.useToken();
 
   const handleMenuClick = ({ key }) => {
-    setSelectedKey(key);
+    if (key === "7") {
+      // Navigate to the external contact page
+      window.open("https://dynamopackage.com/contact", "_blank");
+    } else if (key === "6") {
+      // Handle capacity click
+      const token = localStorage.getItem("token");
+      const userId = userData?._id; // Assuming userData contains userId
+  
+      if (!token) {
+        console.error("User token or ID is missing!");
+        return; // Exit if no token or userId is available
+      }
+  
+      // Construct the URL with query parameters
+      const billingUrl = new URL("https://billing.dynamopackage.com");
+      billingUrl.searchParams.append("token", token);
+  
+      // Navigate to the billing page in the same tab with parameters
+      window.location.href = billingUrl.href;
+    } else if (key === "8") {
+      // Handle logout
+      localStorage.removeItem("key");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login"; // Redirect to the login page
+    } else {
+      // Update selected key only for navigable menu items
+      setSelectedKey(key);
+    }
   };
+  
+  
 
   const fixedSiderStyle = {
     position: 'fixed',
@@ -203,25 +241,72 @@ useEffect(() => {
   <Loading />
 ) : (
     <Layout theme="dark" style={{ minHeight: "100vh"}}>
-      <Sider theme="dark" collapsible collapsed={collapsed} style={fixedSiderStyle} onCollapse={setCollapsed} className="shadow-2xl">
-        <div
+    <Sider
+  theme="dark"
+  collapsible
+  collapsed={collapsed}
+  style={fixedSiderStyle}
+  onCollapse={setCollapsed}
+  className="shadow-2xl"
+>
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      height: "100%",
+    }}
+  >
+    {/* Menu Section */}
+    <div style={{ flexGrow: 1 }}>
+      <div
+        style={{
+          height: 0,
+          margin: 16,
+          background: "rgba(255, 255, 255, 0.3)",
+        }}
+      />
+      <div
+      style={{
+        height: collapsed ? "64px" : "70px",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: collapsed ? "6px 10px" : "4px 10px",
+      }}
+    >
+      <a
+        href="https://dynamopackage.com"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img
+          className="mb-4"
+          src={logocompany}
+          alt="Company Logo"
           style={{
-            height: 0,
-            margin: 16,
-            background: "rgba(255, 255, 255, 0.3)",
+            height: "100%",
+            maxWidth: collapsed ? "90%" : "60%",
+            objectFit: "contain",
+            transition: "all 0.3s",
+            marginLeft: collapsed ? "0" : "40px",
           }}
         />
-       
-        <Menu
-          theme="dark"
-          defaultSelectedKeys={["1"]}
-          mode="inline"
-          items={menuItems}
-          onClick={handleMenuClick}
-          style={{ fontFamily: "Arial, sans-serif", fontSize: "17px" }}
-   
-        />
-      </Sider>
+      </a>
+    </div>
+      <Menu
+        theme="dark"
+        defaultSelectedKeys={["1"]}
+        mode="inline"
+        items={menuItems}
+        onClick={handleMenuClick}
+        style={{ fontFamily: "Arial, sans-serif", fontSize: "17px" }}
+      />
+    </div>
+
+    {/* Logo Section */}
+    
+  </div>
+</Sider>
       <Layout>
         <Content  style={{ margin: "0 0px",paddingTop:"0px" }} >
           

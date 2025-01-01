@@ -140,7 +140,7 @@ const Register = () => {
 
   useEffect(() => {
     const options = {
-      strings: ['Track Live', 'Manage Invetory', 'Manage Returns','Manage Customers','Manage Vendors','Manage Products'],
+      strings: ['Packages', 'Invetory', 'Returns','Customers','Vendors','Products'],
       typeSpeed: 280,
       backSpeed: 180,
       loop: true,
@@ -178,20 +178,20 @@ const Register = () => {
         <div className="mx-auto max-w-2xl py-16 sm:py-20 lg:py-10">
         
           <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-600 sm:text-6xl custom-font">
+          <h1 className="text-4xl font-bold tracking-tight text-gray-600 sm:text-5xl custom-font">
         Manage and monitor every aspect of your <br></br> <span id="typed" className="text-blue-400"></span>.
       </h1>
 
       <p className="mt-6 text-base leading-8 text-gray-600 hidden xl:block">
-            DynamoFleet is the ideal fleet management software, providing comprehensive solutions to manage both your vehicles and drivers. Enhance cost efficiency, and assume full control over your fleet management.
+      Track your packages live from shipping to delivery, manage products, and streamline sending and receiving across multiple hubs for your customers or vendors. Monitor when vendors or customers send returns, and easily plan for returned items. Notify vendors and customers during shipments, track inventory levels across hubs, and identify the fastest shipping methods to enhance efficiency.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
             <Button
               color="success"
               variant="flat"
-              className="shadow-2xl border border-indigo-300 text-gray-700"
+              className="shadow-2xl border border-blue-800 text-gray-700 hover:no-underline"
               as="a"
-              href="https://www.dynamofleet.com/"
+              href="https://www.dynamopackage.com/"
               target="_blank" // optional, to open in a new tab
               rel="noopener noreferrer" // optional, for security reasons
             >
@@ -199,7 +199,7 @@ const Register = () => {
             </Button>
 
             
-            <a href="https://www.dynamofleet.com/learn" className="text-sm font-semibold leading-6 text-gray-900">
+            <a href="https://www.dynamopackage.com/learn" className="text-sm font-semibold leading-6 text-gray-900 hover:no-underline">
             Learn more <span aria-hidden="true">→</span>
             </a>
 
