@@ -30,61 +30,109 @@ const Login = () => {
   const [selected, setSelected] = React.useState("login");
   const [isVisible, setIsVisible] = React.useState(false);
   const toggleVisibility = () => setIsVisible(!isVisible);
-
+  useEffect(() => {
+    const loginWithKey = async () => {
+      const key = localStorage.getItem("key");
+      if (key) {
+        try {
+          const response = await fetch("https://api.globalpackagetracker.com/user/authByKey", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json", // Set content-type as JSON
+            },
+            body: JSON.stringify({ key }), // Pass the key in the body
+          });
+  
+          const data = await response.json();
+  
+          if (response.status === 200) {
+            // Save user data to local storage
+            localStorage.setItem("user", JSON.stringify({
+              name: data.name,
+              email: data.email,
+              capacity: data.capacity,
+            }));
+  
+            // Redirect to the dashboard or homepage
+            navigate("/");
+          } else {
+            console.error("Automatic login failed:", data.message || "Unknown error");
+            localStorage.removeItem("key"); // Remove invalid key
+          }
+        } catch (err) {
+          console.error("Error during automatic login:", err);
+        }
+      }
+    };
+  
+    loginWithKey();
+  }, [navigate]);
+  
   
   const handleLogin = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-
+    setIsLoading(true)
+    // First POST request to /user/authByCredentials
     try {
-        const storedKey = localStorage.getItem("key");
+      const response = await fetch("https://api.globalpackagetracker.com/user/authByCredentials", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+  
+      const data = await response.json();
 
-        if (storedKey) {
-            // If key exists, use it directly
-            const keyResponse = await fetch("https://api.globalpackagetracker.com/user/authByKey", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ key: storedKey }),
-            });
-            const keyData = await keyResponse.json();
-
-            if (keyResponse.ok) {
-                // Save user data
-                localStorage.setItem("user", JSON.stringify({
-                    name: keyData.name,
-                    email: keyData.email,
-                    capacity: keyData.capacity,
-                }));
-                toast.success("Login successful!");
-                navigate("/dashboard");
-            } else {
-                toast.error("Authentication failed with the key.");
-            }
+  
+      if (response.status === 200) {
+        // Save token and key to local storage
+        localStorage.setItem("token", data.jwt);
+        localStorage.setItem("key", data.key);
+  
+        // Second POST request to /user/authByKey
+        const secondResponse = await fetch("https://api.globalpackagetracker.com/user/authByKey", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json", // Set content-type as JSON
+          },
+          body: JSON.stringify({ key: data.key }), // Pass the key in the body
+        });
+  
+        const secondData = await secondResponse.json();
+  
+        if (secondResponse.status === 200) {
+          // Save the user data to local storage
+        
+          localStorage.setItem("user", JSON.stringify({
+            name: secondData.name,
+            email: secondData.email,
+            capacity: secondData.capacity,
+          }));
+          setSuccessMessage("Login successful!");
+          setIsSuccess(true);
+          setIsLoading(false)
+          setTimeout(() => {
+            setIsSuccess(false);
+            setSuccessMessage("");
+            navigate("/");
+          }, 2000);
         } else {
-            // Proceed with the credential-based login
-            const response = await fetch("https://api.globalpackagetracker.com/user/authByCredentials", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
-            });
-            const data = await response.json();
-
-            if (response.ok) {
-                localStorage.setItem("token", data.jwt);
-                localStorage.setItem("key", data.key);
-                toast.success("Login successful!");
-                navigate("/dashboard");
-            } else {
-                toast.error(data.message || "Login failed.");
-            }
+          setErrorMessage("Authentication failed with the key.");
+          setIsLoading(false)
         }
-    } catch (error) {
-        toast.error("An error occurred while logging in.");
-    } finally {
-        setIsLoading(false);
+      } else {
+        setErrorMessage(data.message || "Authentication failed with credentials.");
+        setIsLoading(false)
+      }
+    } catch (err) {
+      setErrorMessage("An error occurred while logging in.");
+      setIsLoading(false)
+      console.error(err);
+    }finally {
+      setIsLoading(false);
     }
-};
-
+  };
 
   useEffect(() => {
     setIsLoaded(true);
