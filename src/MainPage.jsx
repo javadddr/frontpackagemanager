@@ -45,6 +45,7 @@ const MainPage = () => {
     }
   }, []);
   const [collapsed, setCollapsed] = useState(false);
+
   const [selectedKey, setSelectedKey] = useState("1");
   const { hubs, vendors,otherShipments, customers, products, backendShipments, backendShipments1, backendShipments2 } = useHubs();
   const [productStats, setProductStats] = useState({
@@ -75,9 +76,9 @@ const MainPage = () => {
         { label: "Customers", key: "5-3" },
       ],
     },
-    { label: `Capacity: ${userData?.capacity || 0}`, key: "6" ,style: { backgroundColor: "#12A150",color:"black",fontSize:"14px",marginTop:"370px",height:"25px",textAlign:"start" }, icon: <GrCapacity style={{ fontSize: "19px" }} /> },
-    { label: "Contact us", key: "7",style: { backgroundColor: "#09AACD",color:"black",fontSize:"14px" ,height:"25px",textAlign:"start"}, icon: <MdOutlineContactMail style={{ fontSize: "19px" }} /> },
-    { label: "Log out", key: "8",style: { backgroundColor: "#936316",color:"black",fontSize:"14px" ,height:"25px",textAlign:"start"}, icon: <IoMdLogOut style={{ fontSize: "19px" }} /> },
+    { label: `Capacity: ${userData?.capacity || 0}`, key: "6" ,style: { backgroundColor: "#12A150",color:"black",fontSize:"14px",marginTop:"370px",height:"25px",textAlign:"start" }, icon: <GrCapacity style={{ fontSize: "19px",height:"30px" }} /> },
+    { label: "Contact us", key: "7",style: { backgroundColor: "#09AACD",color:"black",fontSize:"14px" ,height:"25px",textAlign:"start"}, icon: <MdOutlineContactMail style={{ fontSize: "19px",height:"30px" }} /> },
+    { label: "Log out", key: "8",style: { backgroundColor: "#936316",color:"black",fontSize:"14px" ,height:"25px",textAlign:"start"}, icon: <IoMdLogOut style={{ fontSize: "19px",height:"30px" }} /> },
   ];
   // Define getNameById as a standalone function
   const getNameById = (array, id) => {
@@ -202,7 +203,7 @@ useEffect(() => {
   const fixedSiderStyle = {
     position: 'fixed',
     height: '100vh',
-    overflowY: 'auto',
+    overflowY: 'hidden',
     zIndex: 1000,
     left: 0,
     top: 0,
@@ -303,7 +304,9 @@ useEffect(() => {
       />
     </div>
 
-    {/* Logo Section */}
+   {/* <div style={{position:"fixed",bottom:"100px"}}>
+    javad
+   </div> */}
     
   </div>
 </Sider>
