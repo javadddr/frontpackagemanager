@@ -187,10 +187,10 @@ useEffect(() => {
       window.location.href = billingUrl.href;
     } else if (key === "8") {
       // Handle logout
-      // localStorage.removeItem("key");
-      // localStorage.removeItem("token");
-      // localStorage.removeItem("user");
-      // window.location.href = "/login"; // Redirect to the login page
+      localStorage.removeItem("key");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login"; // Redirect to the login page
     } else {
       // Update selected key only for navigable menu items
       setSelectedKey(key);
