@@ -7,6 +7,7 @@ import { TbSquareArrowRight } from "react-icons/tb";
 import { Card, CardBody, CardFooter } from "@nextui-org/react";
 import logo from "./dil.png"
 import logo1 from "./tran.png"
+import FooterLogin from './FooterLogin';
 import logo2 from "./cer.png"
 import logo3 from "./cancel.png"
 import logo40 from "./pen.png"
@@ -17,6 +18,7 @@ import { FaTruck, FaCheckCircle, FaClock } from 'react-icons/fa';
 import { DeleteIcon } from './DeleteIcon'; // Assuming you have this icon component
 import { Pagination } from '@nextui-org/react';
 import { Accordion, AccordionItem } from '@nextui-org/react';
+import { Input } from "@nextui-org/react";
 function CusShare() {
   const [returnData, setReturnData] = useState({});
   const [password, setPassword] = useState('');
@@ -134,21 +136,26 @@ setOwner(data.owner)
   };
 
   return (
-    <div>
-      {!showContent ? (
-        <div>
-          <h1>CusShare</h1>
-          <form onSubmit={handlePasswordSubmit}>
-            <input 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              placeholder="Enter Password"
+    <div className="flex items-center flex-col justify-center h-screen bg-gray-100">
+     {!showContent ? (
+        <Card className="p-6 shadow-lg w-80">
+          <h1 className="text-xl font-semibold text-center mb-4">Send Return</h1>
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <Input
+              fullWidth
+              type="password"
+              label="Enter Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
             />
-            <button type="submit">Send Return</button>
-            {error && <p style={{color: 'red'}}>{error}</p>}
+            <Button type="submit" color="secondary" variant='flat' className="w-full">
+              Log in 
+            </Button>
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           </form>
-        </div>
+        </Card>
+       
       ) : (
         <div>
         <div className="">
@@ -423,6 +430,11 @@ setOwner(data.owner)
         </div>
         </div>
       )}
+        <div>Dynamo Package </div>
+         <div className='rounded-3xl bordered shadow-lg' style={{marginTop:'47px'}}>
+       
+        <FooterLogin/>
+        </div>
     </div>
   );
 }

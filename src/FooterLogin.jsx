@@ -16,10 +16,10 @@ export default function FooterLogin() {
           />
           <FooterLinkGroup>
           <FooterLink href="https://www.dynamopackage.com/contact">Contact</FooterLink>
-            <FooterLink className="ml-3" href="https://globalpackagetracker.com/policies/impressum">Legal notice</FooterLink>
-            <FooterLink className="ml-3" href="https://globalpackagetracker.com/policies/privacy-policy">Privacy Policy</FooterLink>
-            <FooterLink className="ml-3" href="https://globalpackagetracker.com/policies/terms-of-service">Terms of service</FooterLink>
-
+            <FooterLink className="ml-3" href="https://www.dynamopackage.com/legal-notice">Legal notice</FooterLink>
+            <FooterLink className="ml-3" href="https://www.dynamopackage.com/privacy-policy">Privacy Policy</FooterLink>
+            <FooterLink className="ml-3" href="https://www.dynamopackage.com/terms-of-service">Terms of service</FooterLink>
+            <FooterLink className="ml-3" href="https://www.dynamopackage.com/impressum">Impressum</FooterLink>
           </FooterLinkGroup>
         </div>
 
