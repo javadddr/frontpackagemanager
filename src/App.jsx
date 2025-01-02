@@ -6,6 +6,8 @@ import Login from "./Login";
 import Register from "./Register";
 import CusShare from "./CusShare";
 import Layout from "./Layout"; 
+import InitializeApp from "./InitializeApp"; // Import InitializeApp
+
 const App = () => {
   const navigate = useNavigate();
   const location = useLocation(); // Get the current location
@@ -54,28 +56,27 @@ const App = () => {
   const shouldWrapWithHubsProvider = location.pathname !== "/login" && location.pathname !== "/register" && !location.pathname.startsWith("/return");
 
   return (
-    // Conditionally apply the HubsProvider based on current route
     <>
-    <Layout>
-      {shouldWrapWithHubsProvider ? (
-        <HubsProvider> {/* Wrap with HubsProvider if not on login/register/return page */}
+      <InitializeApp /> {/* Add InitializeApp at the root level */}
+      <Layout>
+        {shouldWrapWithHubsProvider ? (
+          <HubsProvider> {/* Wrap with HubsProvider if not on login/register/return page */}
+            <Routes>
+              <Route path="/" element={<MainPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/return" element={<CusShare />} />
+              <Route path="/return/*" element={<RedirectToReturn />} />
+            </Routes>
+          </HubsProvider>
+        ) : (
           <Routes>
-            
-            <Route path="/" element={<MainPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/return" element={<CusShare />} />
             <Route path="/return/*" element={<RedirectToReturn />} />
           </Routes>
-        </HubsProvider>
-      ) : (
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/return" element={<CusShare />} />
-          <Route path="/return/*" element={<RedirectToReturn />} />
-        </Routes>
-      )}
+        )}
       </Layout>
     </>
   );
