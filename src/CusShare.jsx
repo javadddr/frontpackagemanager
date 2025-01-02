@@ -12,6 +12,7 @@ import logo2 from "./cer.png"
 import logo3 from "./cancel.png"
 import logo40 from "./pen.png"
 import logo4 from "./noship.jpg"
+import logobed from "./assets/dynamologo 3.png"
 import { motion } from 'framer-motion';
 import { Package, Truck, Calendar, User, Clock, MapPin, Tag } from 'react-feather';
 import { FaTruck, FaCheckCircle, FaClock } from 'react-icons/fa';
@@ -136,8 +137,9 @@ setOwner(data.owner)
   };
 
   return (
-    <div className="flex items-center flex-col justify-center h-screen bg-gray-100">
+    <div>
      {!showContent ? (
+       <div className="flex items-center flex-col justify-center h-screen bg-gray-100">
         <Card className="p-6 shadow-lg w-80">
           <h1 className="text-xl font-semibold text-center mb-4">Send Return</h1>
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
@@ -155,7 +157,62 @@ setOwner(data.owner)
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           </form>
         </Card>
-       
+        <div className="flex flex-col items-center justify-center mt-10 space-y-6">
+      {/* Clickable Logo */}
+      <a href="https://dynamopackage.com" target="_blank" rel="noopener noreferrer">
+        <img src={logobed} alt="Dynamo Logo" className="w-32 h-auto cursor-pointer" />
+      </a>
+      
+      {/* Button */}
+      <Button color="warning" variant="flat" className="w-full text-center">
+        Effortlessly track and manage all your packages and shipments with Dynamo Package.
+      </Button>
+
+      {/* Links */}
+      <div className="flex flex-wrap justify-center space-x-4 text-sm text-gray-600">
+        <a
+          href="https://www.dynamopackage.com/contact"
+          className="hover:text-warning transition"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Contact
+        </a>
+        <a
+          href="https://www.dynamopackage.com/legal-notice"
+          className="hover:text-warning transition"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Legal Notice
+        </a>
+        <a
+          href="https://www.dynamopackage.com/privacy-policy"
+          className="hover:text-warning transition"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Privacy Policy
+        </a>
+        <a
+          href="https://www.dynamopackage.com/terms-of-service"
+          className="hover:text-warning transition"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Terms of Service
+        </a>
+        <a
+          href="https://www.dynamopackage.com/impressum"
+          className="hover:text-warning transition"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Impressum
+        </a>
+      </div>
+    </div>
+        </div>
       ) : (
         <div>
         <div className="">
@@ -430,11 +487,7 @@ setOwner(data.owner)
         </div>
         </div>
       )}
-        <div>Dynamo Package </div>
-         <div className='rounded-3xl bordered shadow-lg' style={{marginTop:'47px'}}>
        
-        <FooterLogin/>
-        </div>
     </div>
   );
 }
