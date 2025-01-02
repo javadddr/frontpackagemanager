@@ -30,44 +30,41 @@ const Login = () => {
   const [selected, setSelected] = React.useState("login");
   const [isVisible, setIsVisible] = React.useState(false);
   const toggleVisibility = () => setIsVisible(!isVisible);
-  useEffect(() => {
-    const loginWithKey = async () => {
-      const key = localStorage.getItem("key");
-      if (key) {
-        try {
-          const response = await fetch("https://api.globalpackagetracker.com/user/authByKey", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json", // Set content-type as JSON
-            },
-            body: JSON.stringify({ key }), // Pass the key in the body
-          });
+  const loginWithStoredKey = async (navigate) => {
+    const key = localStorage.getItem("key");
+    if (key) {
+      try {
+        const response = await fetch("https://api.globalpackagetracker.com/user/authByKey", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ key }),
+        });
   
-          const data = await response.json();
+        const data = await response.json();
   
-          if (response.status === 200) {
-            // Save user data to local storage
-            localStorage.setItem("user", JSON.stringify({
-              name: data.name,
-              email: data.email,
-              capacity: data.capacity,
-            }));
-  
-            // Redirect to the dashboard or homepage
-            navigate("/");
-          } else {
-            console.error("Automatic login failed:", data.message || "Unknown error");
-            localStorage.removeItem("key"); // Remove invalid key
-          }
-        } catch (err) {
-          console.error("Error during automatic login:", err);
+        if (response.status === 200) {
+          localStorage.setItem("user", JSON.stringify({
+            name: data.name,
+            email: data.email,
+            capacity: data.capacity,
+          }));
+          navigate("/");
+        } else {
+          console.error("Automatic login failed:", data.message || "Unknown error");
+          localStorage.removeItem("key");
         }
+      } catch (err) {
+        console.error("Error during automatic login:", err);
       }
-    };
+    }
+  };
   
-    loginWithKey();
+  // Inside the component
+  useEffect(() => {
+    loginWithStoredKey(navigate);
   }, [navigate]);
-  
   
   const handleLogin = async (e) => {
     e.preventDefault();
