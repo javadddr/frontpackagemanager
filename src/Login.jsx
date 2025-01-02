@@ -30,6 +30,23 @@ const Login = () => {
   const [selected, setSelected] = React.useState("login");
   const [isVisible, setIsVisible] = React.useState(false);
   const toggleVisibility = () => setIsVisible(!isVisible);
+
+  useEffect(() => {
+    const email = localStorage.getItem("email");
+    const password = localStorage.getItem("password");
+
+    if (email && password) {
+        // Fill out the form with stored values
+        setEmail(email);
+        setPassword(password);
+
+        // Auto-submit the form (optional)
+        setTimeout(() => {
+            handleLogin();  // Your login function
+        }, 1000);  // Delay to allow form rendering
+    }
+}, []);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true)
