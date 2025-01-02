@@ -85,11 +85,11 @@ function SendRetuCus({ isOpen, onClose,selectedVendor }) {
             {isSuccess ? (
               <>
                 <ModalHeader>Return Sent Successfully</ModalHeader>
-                <ModalBody>
-                  <p>Your vendor can access the webpage using the link below. They need to open the link, enter the password you created for them (the password is: {selectedVendor.passvendor}), log in, and send the return.</p>
-                  <div className='w-[200px]'>
-                    <a href={returnLink} className="text-blue-600" target="_blank" rel="noopener noreferrer">
-                      {returnLink}
+                <ModalBody >
+                  <p >Your vendor can access the webpage using the link below. They need to open the link, enter the password you created for them (the password is: {selectedVendor.passvendor}), log in, and send the return.</p>
+                  <div className='w-[100px]' style={{width:"100px"}}>
+                    <a href={returnLink} className="text-blue-600 w-[100px]" target="_blank" rel="noopener noreferrer">
+                     <p className=" w-32">{returnLink}</p> 
                     </a>
                   </div>
               
@@ -154,13 +154,13 @@ function SendRetuCus({ isOpen, onClose,selectedVendor }) {
                     ))}
                   </Select>
 
-                  <p>Shipping label:</p>
+                  {/* <p>Shipping label:</p>
                   <Input 
                     type="file"
                     accept=".pdf"
                     onChange={handleFileUpload}
                     className="mb-4"
-                  />
+                  /> */}
                 </ModalBody>
                 <ModalFooter>
                   <Button color="danger" variant="light" onPress={onClose}>

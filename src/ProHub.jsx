@@ -18,34 +18,42 @@ import { IoSquareSharp } from "react-icons/io5";
 function ProHub() {
   const { products } = useHubs();
 
-  const chartData = products.reduce((acc, product) => {
-    let hubEntry = acc.find(item => item.hub === product.hub);
-    if (!hubEntry) {
-      hubEntry = { hub: product.hub, products: [] };
-      acc.push(hubEntry);
-    }
+  const chartData = products.length === 0 
+  ? [] 
+  : products.reduce((acc, product) => {
+      let hubEntry = acc.find(item => item.hub === product.hub);
+      if (!hubEntry) {
+        hubEntry = { hub: product.hub, products: [] };
+        acc.push(hubEntry);
+      }
     
-    hubEntry.products.push({
-      name: product.name,
-      currentInventory: product.currentInventory,
-      fill: product.currentInventory < product.reorderLevel ? "rgb(204, 44, 75)" : "hsl(var(--chart-2))",
-    });
+      hubEntry.products.push({
+        name: product.name,
+        currentInventory: product.currentInventory,
+        fill: product.currentInventory < product.reorderLevel ? "rgb(204, 44, 75)" : "hsl(var(--chart-2))",
+      });
 
-    return acc;
+      return acc;
   }, []);
+
 
   // Dynamically create chartConfig based on product names
   const chartConfig = useMemo(() => {
     const config = {};
-    chartData[0].products.forEach((product, index) => {
-      config[`products[${index}].currentInventory`] = {
-        label: product.name,
-        color: product.fill,
-        icon: (props) => <IoSquareSharp size={16} style={{ color: product.fill, marginRight: "-6px", marginTop: "1px" }} />,
-      };
-    });
+  
+    if (chartData.length > 0) {
+      chartData[0].products.forEach((product, index) => {
+        config[`products[${index}].currentInventory`] = {
+          label: product.name,
+          color: product.fill,
+          icon: (props) => <IoSquareSharp size={16} style={{ color: product.fill, marginRight: "-6px", marginTop: "1px" }} />,
+        };
+      });
+    }
+  
     return config;
   }, [chartData]);
+  
 
   return (
     <Card className="mt-10 mr-3 h-[300px] w-[400px] dark">
@@ -104,7 +112,7 @@ function ProHub() {
                 </ChartTooltipContent>
               }
             />
-            {chartData[0].products.map((_, index) => (
+          {chartData.length > 0 && chartData[0].products.map((_, index) => (
               <Bar
                 key={`bar-${index}`}
                 dataKey={`products[${index}].currentInventory`}
@@ -120,6 +128,8 @@ function ProHub() {
                 />
               </Bar>
             ))}
+
+          
           </BarChart>
         </ChartContainer>
       </CardContent>

@@ -19,11 +19,12 @@ import { IoSquareSharp } from "react-icons/io5";
 export default function ProChart() {
   const { products } = useHubs();
 
-  const chartData = products.map((product) => ({
+  const chartData = products.length === 0 ? [] : products.map((product) => ({
     name: product.name,
     currentInventory: product.currentInventory,
     fill: product.currentInventory < product.reorderLevel ? "rgb(204, 44, 75)" : "hsl(var(--chart-2))",
   }));
+  
 
   const chartConfig = {
    
