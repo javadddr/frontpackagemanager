@@ -53,7 +53,7 @@ function SendRetuCus({ isOpen, onClose,selectedVendor }) {
   
         // Generate the link
         const randomLetters = () => Math.random().toString(36).substring(2, 6).toUpperCase();
-        const link = `${backendUrl2}/return/${randomLetters()}${owner}${randomLetters()}/${selectedVendor._id}/${selectedProduct ? selectedProduct : 'no-product'}/${data.returnId}`;  // Handle case where product might not be selected
+        const link = `${backendUrl2}return/${randomLetters()}${owner}${randomLetters()}/${selectedVendor._id}/${selectedProduct ? selectedProduct : 'no-product'}/${data.returnId}`;  // Handle case where product might not be selected
         setReturnLink(link);
         setIsSuccess(true);
       } catch (error) {
