@@ -523,8 +523,8 @@ className="w-full dark border relative" // Add `relative` to position the delete
     </div>
   ) : (
     <div className="flex flex-col items-center justify-center w-full pt-16   ">
-      <img src={logo} alt="No customers available" className="w-[450px] h-[450px] mb-10 object-cover" />
-      <p className="text-center text-lg text-gray-500">No Customers found. Why not start by adding your first one?</p>
+      <img src={logo} alt="No customers available" className="mb-4 mt-[7%] w-[450px] h-[450px] mb-10 object-cover" />
+      <p className="text-center text-lg text-gray-300">No Customers found. Why not start by adding your first one?</p>
     </div>
   )}
 </div>

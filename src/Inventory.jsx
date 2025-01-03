@@ -632,8 +632,8 @@ const [success, setSuccess] = useState(false);
 
 {products.length === 0 ? 
   <div className="flex flex-col items-center justify-center w-full ">
-    <img src={logo} alt="No products available" className="mb-4 mt-[7%] w-96 h-96 object-cover" />
-    <p className="text-center text-lg text-gray-500">No products found. Why not start by adding your first one?</p>
+    <img src={logo} alt="No products available" className="mb-4 mt-[7%] w-96 h-96 object-cover rounded-full" />
+    <p className="text-center text-lg text-gray-300">No products found. Why not start by adding your first one?</p>
   </div>
   :
   <div>

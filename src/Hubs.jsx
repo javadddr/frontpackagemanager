@@ -487,8 +487,8 @@ const [comments, setComments] = useState([{ text: '', creationdate: new Date() }
     </div>
   ) : (
     <div className="flex flex-col items-center justify-center w-full ">
-      <img src={logo} alt="No hubs available" className="w-[500px] h-[500px] object-cover" />
-      <p className="text-center text-lg text-gray-500">No Hubs found. Why not start by adding your first one?</p>
+      <img src={logo} alt="No hubs available" className=" mb-4 mt-[7%] w-[500px] h-[500px] object-cover rounded-full" />
+      <p className="text-center text-lg text-gray-300">No Hubs found. Why not start by adding your first one?</p>
     </div>
   )}
 </div>

@@ -654,8 +654,8 @@ const handleEdit = async (id) => {
       </>
         ) : (
           <div className="flex flex-col items-center justify-center w-full -mt-16  min-h-[100vh] ">
-        <img src={logo4} alt="No vendors available" className="w-[500px] h-[500px] object-cover " />
-        <p className="text-center text-lg text-gray-600">No shipment found. Create your first one or change the filters!</p>
+        <img src={logo4} alt="No vendors available" className="w-[500px] h-[500px] object-cover  rounded-full" />
+        <p className="text-center text-lg text-gray-300">No shipment found. Create your first one or change the filters!</p>
       </div>
         )}
       </div>

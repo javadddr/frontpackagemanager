@@ -860,8 +860,8 @@ console.log("vendor",vendor)
     </div>
   ) : (
     <div className="flex flex-col items-center justify-center w-full ">
-      <img src={logo} alt="No vendors available" className="w-[500px] h-[500px] object-cover" />
-      <p className="text-center text-lg text-gray-500">No Vendors found. Why not start by adding your first one?</p>
+      <img src={logo} alt="No vendors available" className="mb-4 mt-[7%] w-[500px] h-[500px] object-cover rounded-full" />
+      <p className="text-center text-lg text-gray-300">No Vendors found. Why not start by adding your first one?</p>
     </div>
   )}
 </div>
