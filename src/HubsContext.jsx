@@ -16,6 +16,7 @@ export const HubsProvider = ({ children }) => {
   const [vendors, setVendors] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [shipments, setShipments] = useState([]);
+
   const [backendShipments, setBackendShipments] = useState([]);
   const [backendShipments1, setBackendShipments1] = useState([]);
   const [backendShipments2, setBackendShipments2] = useState([]);
@@ -25,6 +26,7 @@ export const HubsProvider = ({ children }) => {
   const [otherShipments, setOtherShipments] = useState([]);
   const [totalReturn, setTotalReturn] = useState([]);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   // Fetch hubs from API
   const fetchHubs = async () => {
     try {

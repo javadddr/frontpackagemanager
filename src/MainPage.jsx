@@ -179,9 +179,9 @@ useEffect(() => {
         console.error("User token or ID is missing!");
         return; // Exit if no token or userId is available
       }
-  
+    
       // Construct the URL with query parameters
-      const billingUrl = new URL("https://billing.dynamopackage.com");
+      const billingUrl = new URL(window.location.origin + "/billing");
       billingUrl.searchParams.append("token", token);
   
       // Navigate to the billing page in the same tab with parameters

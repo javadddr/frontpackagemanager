@@ -6,6 +6,7 @@ import Login from "./Login";
 import Register from "./Register";
 import CusShare from "./CusShare";
 import Layout from "./Layout"; 
+import Billing from "./Billing";
 const App = () => {
   const navigate = useNavigate();
   const location = useLocation(); // Get the current location
@@ -65,6 +66,7 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/return" element={<CusShare />} />
+            <Route path="/billing" element={<Billing />} /> 
             <Route path="/return/*" element={<RedirectToReturn />} />
           </Routes>
         </HubsProvider>

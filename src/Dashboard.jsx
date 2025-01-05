@@ -23,7 +23,7 @@ function Dashboard({productStats,otherShipments}) {
   const now = moment();
 const startOfWeek = now.clone().startOf('isoWeek');
 const endOfWeek = now.clone().endOf('isoWeek');
-
+console.log("shipments",shipments)
 let returnCounti = 0;
 let shipCounti = 0;
 
