@@ -122,16 +122,16 @@ useEffect(() => {
 
       />,
     },
-    {
-      title: 'Alerts and Notifications',
-      content: <StepThree
-      notify={notify}
-      setNotify={setNotify}
-      notifyWhen={notifyWhen}
-      setNotifyWhen={setNotifyWhen}
+    // {
+    //   title: 'Alerts and Notifications',
+    //   content: <StepThree
+    //   notify={notify}
+    //   setNotify={setNotify}
+    //   notifyWhen={notifyWhen}
+    //   setNotifyWhen={setNotifyWhen}
 
-      />,
-    },
+    //   />,
+    // },
   ];
 
   const { token } = theme.useToken();
