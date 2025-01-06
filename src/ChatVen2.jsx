@@ -66,7 +66,14 @@ const ChatVen2 = ({vendorId,owner}) => {
     }
   };
   useEffect(() => {
-    ws.current = new WebSocket('ws://localhost:5000'); // Assuming your server is on port 5000
+  
+   const wsUrl = window.location.hostname === 'localhost'
+  ? 'ws://localhost:5000'
+  : 'wss://api.dynamopackage.com';
+
+ws.current = new WebSocket(wsUrl);
+
+    
 
     ws.current.onopen = () => {
       console.log('WebSocket Connected');
@@ -86,7 +93,7 @@ const ChatVen2 = ({vendorId,owner}) => {
     return () => {
       ws.current.close();
     };
-  }, [owner, vendorId]);
+  }, [owner, vendorId,messages,newMessage]);
   const sendMessage = async () => {
     const formData = new FormData();
     formData.append('vendorId', vendorId);
