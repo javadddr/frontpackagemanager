@@ -66,34 +66,39 @@ const ChatVen2 = ({vendorId,owner}) => {
     }
   };
   useEffect(() => {
+    // Define WebSocket URL based on environment
+    const wsUrl = window.location.hostname === 'localhost'
+      ? 'ws://localhost:5000'
+      : 'wss://api.dynamopackage.com';
   
-   const wsUrl = window.location.hostname === 'localhost'
-  ? 'ws://localhost:5000'
-  : 'wss://api.dynamopackage.com';
-
-ws.current = new WebSocket(wsUrl);
-
-    
-
+    // Create WebSocket connection
+    ws.current = new WebSocket(wsUrl);
+  
+    // On WebSocket connection open
     ws.current.onopen = () => {
       console.log('WebSocket Connected');
     };
-
+  
+    // On receiving a message from WebSocket
     ws.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === 'updateMessages') {
-        setMessages(data.messages);
+        // Update the messages state when new messages arrive
+        setMessages((prevMessages) => [...prevMessages, ...data.messages]); // Append new messages
       }
     };
-
+  
+    // Handle WebSocket connection close
     ws.current.onclose = () => {
       console.log('WebSocket Disconnected');
     };
-
+  
+    // Cleanup WebSocket connection when component unmounts
     return () => {
       ws.current.close();
     };
-  }, [owner, vendorId,messages,newMessage]);
+  }, []); // Empty dependency array to run this effect only once when the component mounts
+  
   const sendMessage = async () => {
     const formData = new FormData();
     formData.append('vendorId', vendorId);

@@ -38,38 +38,44 @@ console.log("file",file)
     }
   };
   useEffect(() => {
- 
-   const wsUrl = window.location.hostname === 'localhost'
-  ? 'ws://localhost:5000'
-  : 'wss://api.dynamopackage.com';
-
-ws.current = new WebSocket(wsUrl);
-
-
+    // Define WebSocket URL based on environment
+    const wsUrl = window.location.hostname === 'localhost'
+      ? 'ws://localhost:5000'
+      : 'wss://api.dynamopackage.com';
+  
+    // Create WebSocket connection
+    ws.current = new WebSocket(wsUrl);
+  
+    // On WebSocket connection open
     ws.current.onopen = () => {
       console.log('WebSocket Connected');
     };
-
+  
+    // On receiving a message from WebSocket
     ws.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === 'updateMessages') {
-        setMessages(data.messages);
+        // Update the messages state when new messages arrive
+        setMessages((prevMessages) => [...prevMessages, ...data.messages]); // Append new messages
       }
     };
-
+  
+    // Handle WebSocket connection close
     ws.current.onclose = () => {
       console.log('WebSocket Disconnected');
     };
-
+  
+    // Cleanup WebSocket connection when component unmounts
     return () => {
       ws.current.close();
     };
-  }, [owner, vendorId,messages,newMessage]);
+  }, []); // Empty dependency array to run this effect only once when the component mounts
+  
   const sendMessage = async () => {
     const formData = new FormData();
-    formData.append('owner', owner);
     formData.append('vendorId', vendorId);
-    formData.append('sender', owner); // Assuming owner is sending the message
+    formData.append('owner', owner);
+    formData.append('sender', vendorId);
     formData.append('content', newMessage);
     if (file) {
       formData.append('file', file);
@@ -78,26 +84,34 @@ ws.current = new WebSocket(wsUrl);
     try {
       const response = await fetch(`${backendUrl}/api/chats/`, {
         method: 'POST',
-        body: formData
+        body: formData,
       });
   
       if (!response.ok) {
         throw new Error('Failed to send message');
       }
+  
       const result = await response.json();
-      // Assuming you want to update local state with the new message
-      setMessages(result.messages);
+  
+      // Add a unique message locally if the WebSocket doesn't handle it
+      setMessages((prevMessages) => {
+        if (!prevMessages.some((msg) => msg._id === result.messages[0]._id)) {
+          return [...prevMessages, ...result.messages];
+        }
+        return prevMessages;
+      });
+  
       setNewMessage('');
       setFile(null);
-       // Notify WebSocket server of new message
-       if (ws.current.readyState === WebSocket.OPEN) {
+  
+      if (ws.current.readyState === WebSocket.OPEN) {
         ws.current.send(JSON.stringify({ event: 'messageAdded', owner, vendorId }));
       }
     } catch (error) {
-      console.error("Error sending message:", error);
-      // Handle error
+      console.error('Error sending message:', error);
     }
   };
+  
   const handleDeleteMessage = async (id) => {
     if (!chatId) {
       console.error("Chat ID is not available yet");
