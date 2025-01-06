@@ -4,6 +4,7 @@ import { Tooltip } from "@nextui-org/react";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { RiArrowGoBackFill } from "react-icons/ri";
 import {
   Modal,
   ModalContent,
@@ -91,6 +92,21 @@ export default function BillingPage() {
 
   return (
     <div className="relative bg-gray-900 isolate px-6 pt-0 lg:px-8">
+         <Link to="/">
+      <Button
+        className="w-[220px]"
+        color="danger"
+        variant="ghost"
+        style={{
+          position: "fixed",
+          top: "30px",
+          left: "30px",
+          fontSize: "15.8px",
+        }}
+      >
+        <RiArrowGoBackFill size={50} /> Head Back to the App
+      </Button>
+    </Link>
       <div className="h-[100vh] pt-20 bg-gray-900">
         <div className="mx-auto max-w-7xl px-0 lg:px-8 bg-gray-900">
           <div className="mx-auto max-w-2xl sm:text-center bg-gray-900">
