@@ -85,24 +85,15 @@ function SendRetuCus({ isOpen, onClose,selectedVendor }) {
             {isSuccess ? (
               <>
                 <ModalHeader>Return Sent Successfully</ModalHeader>
-                <ModalBody>
-  <p>
-    Your vendor can access the webpage using the link below. They need to open the link, enter the password you created for them (the password is: {selectedVendor.passvendor}), log in, and send the return.
-  </p>
-  <div className="max-w-[500px] overflow-hidden">
-    <a
-      href={returnLink}
-      className="text-blue-600 block whitespace-nowrap overflow-hidden text-ellipsis"
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{ display: "inline-block", wordBreak: "break-word" }}
-    >
-      {returnLink}
-    </a>
-  </div>
-</ModalBody>
-
-
+                <ModalBody >
+                  <p >Your vendor can access the webpage using the link below. They need to open the link, enter the password you created for them (the password is: {selectedVendor.passvendor}), log in, and send the return.</p>
+                  <div className='w-[100px]' style={{width:"100px"}}>
+                    <a href={returnLink} className="text-blue-600 w-[100px]" target="_blank" rel="noopener noreferrer">
+                     <p className=" w-32">{returnLink}</p> 
+                    </a>
+                  </div>
+              
+                </ModalBody>
                 <ModalFooter>
                
                 <Button 

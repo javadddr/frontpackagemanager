@@ -73,9 +73,9 @@ console.log("file",file)
   
   const sendMessage = async () => {
     const formData = new FormData();
-    formData.append('vendorId', vendorId);
     formData.append('owner', owner);
-    formData.append('sender', vendorId);
+    formData.append('vendorId', vendorId);
+    formData.append('sender', owner); // Assuming owner is sending the message
     formData.append('content', newMessage);
     if (file) {
       formData.append('file', file);
@@ -84,34 +84,26 @@ console.log("file",file)
     try {
       const response = await fetch(`${backendUrl}/api/chats/`, {
         method: 'POST',
-        body: formData,
+        body: formData
       });
   
       if (!response.ok) {
         throw new Error('Failed to send message');
       }
-  
       const result = await response.json();
-  
-      // Add a unique message locally if the WebSocket doesn't handle it
-      setMessages((prevMessages) => {
-        if (!prevMessages.some((msg) => msg._id === result.messages[0]._id)) {
-          return [...prevMessages, ...result.messages];
-        }
-        return prevMessages;
-      });
-  
+      // Assuming you want to update local state with the new message
+      setMessages(result.messages);
       setNewMessage('');
       setFile(null);
-  
-      if (ws.current.readyState === WebSocket.OPEN) {
+       // Notify WebSocket server of new message
+       if (ws.current.readyState === WebSocket.OPEN) {
         ws.current.send(JSON.stringify({ event: 'messageAdded', owner, vendorId }));
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
+      // Handle error
     }
   };
-  
   const handleDeleteMessage = async (id) => {
     if (!chatId) {
       console.error("Chat ID is not available yet");
