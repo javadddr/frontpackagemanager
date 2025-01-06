@@ -8,6 +8,15 @@ import { IoMdLogOut } from "react-icons/io";
 import { GrCapacity } from "react-icons/gr";
 import { MdOutlineContactMail } from "react-icons/md";
 import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+  Button,
+} from "@nextui-org/react";
+import {
   DesktopOutlined,
   FileOutlined,
   PieChartOutlined,
@@ -45,9 +54,9 @@ const MainPage = () => {
     }
   }, []);
   const [collapsed, setCollapsed] = useState(false);
-
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedKey, setSelectedKey] = useState("1");
-  const { hubs, vendors,otherShipments, customers, products, backendShipments, backendShipments1, backendShipments2 } = useHubs();
+  const { hubs, vendors,otherShipments, customers, products,shipments, backendShipments, backendShipments1, backendShipments2 } = useHubs();
   const [productStats, setProductStats] = useState({
     outgoing: {},
     incoming: {},
@@ -304,9 +313,47 @@ useEffect(() => {
       />
     </div>
 
-   {/* <div style={{position:"fixed",bottom:"100px"}}>
-    javad
-   </div> */}
+ { shipments.length===0 &&  <div
+        className="bg-yellow-700 rounded-lg p-2 text-black font-bold hover:cursor-pointer"
+        style={{
+          position: "fixed",
+          bottom: "300px",
+          left: "6px",
+          fontSize: "11.8px",
+        }}
+        onClick={onOpen}
+      >
+        Quick Start Guide: How to <br /> Begin with Dynamo Package!
+      </div>}
+
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange} className="dark" size="4xl">
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                Quick Start Guide
+              </ModalHeader>
+              <ModalBody>
+                <iframe
+                  width="100%"
+                  height="400"
+                  src="https://www.youtube.com/embed/rNToLmmxmsQ"
+                  title="Track and monitor all of your packages from +2100 carriers worldwide in one place"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                ></iframe>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     
   </div>
 </Sider>

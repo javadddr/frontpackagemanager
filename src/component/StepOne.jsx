@@ -242,7 +242,7 @@ function StepOne({
             )}
            </div>
            {typeof sheetstrackingNumbers !== 'undefined' && sheetstrackingNumbers !== null && sheetstrackingNumbers.length > 0 ? (
-              <div className="flex flex-col justify-center items-center text-center self-center h-full bg-gray-900">
+              <div className="flex flex-col justify-center items-center text-center self-center h-full w-full">
               <video 
               src={updone} 
               alt="Update Done" 

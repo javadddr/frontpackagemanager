@@ -104,16 +104,16 @@ const CreateShipVen = ({ handleCloseModal,fetchShipments,fetchBackendShipments,s
 
       />,
     },
-    {
-      title: 'Alerts and Notifications',
-      content: <StepThreeVen
-      notify={notify}
-      setNotify={setNotify}
-      notifyWhen={notifyWhen}
-      setNotifyWhen={setNotifyWhen}
+    // {
+    //   title: 'Alerts and Notifications',
+    //   content: <StepThreeVen
+    //   notify={notify}
+    //   setNotify={setNotify}
+    //   notifyWhen={notifyWhen}
+    //   setNotifyWhen={setNotifyWhen}
 
-      />,
-    },
+    //   />,
+    // },
   ];
 
   const { token } = theme.useToken();
