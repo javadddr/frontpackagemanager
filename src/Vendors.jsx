@@ -320,9 +320,10 @@ const InlineTextField = ({ text, onEdit }) => (
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to delete vendor");
       }
-
-      // Update state or refetch customers
+  
+  
       await fetchVendors();
+      onVendorDetailsClose()
       setErrorMessage("vendor deleted successfully.");
     } catch (error) {
       console.error("Error deleting vendor:", error.message);
@@ -333,10 +334,7 @@ const InlineTextField = ({ text, onEdit }) => (
     }
   };
 
-const dodi = (vendor) => {
-console.log("vendor",vendor)
 
-}
   return (
  
     <div className="pt-6 pl-4 pr-4 bg-zinc-900" style={{ minHeight: "100vh"}}>
@@ -615,14 +613,14 @@ console.log("vendor",vendor)
           >
             
             <Card 
-                disableRipple={true} 
-                isPressable 
-                onPress={() => {
-                  setSelectedVendor(vendor);
-                  onVendorDetailsOpen();
-                }}
-                className="w-full dark border h-[160px]"
-              >
+  disableRipple={true} 
+  isPressable 
+  onPress={(e) => {
+    setSelectedVendor(vendor);
+    onVendorDetailsOpen();
+  }}
+  className="w-full dark border"
+>
               <CardBody style={{ display: "flex", justifyContent: "space-between" }}>
                 <div className="flex">
                   <div style={{ flex: 2 }}>
@@ -657,16 +655,7 @@ console.log("vendor",vendor)
                     <Button size="sm" color="warning" variant="flat">Connect to vendor</Button>
                   </Link>
                 </div> */}
-                <div className="absolute bottom-2 right-2">
-                  <DeleteIcon 
-                  onClick={(e) => { 
-                    e.stopPropagation(); 
-                    setDeletionId(vendor._id); 
-                    onDeleteOpen(); // Changed from onOpen to onDeleteOpen
-                  }} 
-                  className="cursor-pointer text-red-500 w-5 h-5"
-                />
-                </div>
+              
               </CardBody>
             </Card>
             <AnimatePresence>
@@ -676,7 +665,23 @@ console.log("vendor",vendor)
         {selectedVendor && (
           <>
             <ModalHeader>
+              <div className="flex justify-between items-center w-full">
               <h2 className="text-base">{selectedVendor.name}</h2>
+            
+              <div className="absolute bottom-8 right-2">
+                <Button 
+color="danger"
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    setDeletionId(selectedVendor._id); 
+                    onDeleteOpen(); 
+                  }} 
+                  className="cursor-pointer  z-50"
+                >
+                  Delete vendor
+                       </Button>
+                </div>
+              </div>
             </ModalHeader>
             <ModalBody style={{ minHeight: '600px' }}>
               {/* Here you implement your tab logic for settings and messages */}

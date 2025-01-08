@@ -313,7 +313,7 @@ useEffect(() => {
       />
     </div>
 
- { shipments.length===0 &&  <div
+ { shipments?.length===0 &&  <div
         className="bg-yellow-700 rounded-lg p-2 text-black font-bold hover:cursor-pointer"
         style={{
           position: "fixed",

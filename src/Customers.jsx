@@ -11,6 +11,17 @@ import { KeyOutlined } from '@ant-design/icons';
 import { DeleteIcon } from "./DeleteIcon";
 import logo from "./cus.png"
 import { Card, CardBody } from "@nextui-org/react";
+import { Tabs,Tab,CheckboxGroup,Checkbox } from "@nextui-org/react";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Pagination,
+  getKeyValue,
+} from "@nextui-org/react";
 import Street from "./Street";
 import { 
   UserOutlined, 
@@ -25,7 +36,7 @@ import MapGE from "./MapGE";
 import MapWO from "./MapWO";
 const MotionButton = motion(Button);
 function Customers() {
-  const { customers,backendShipments,backendShipments1, fetchCustomers,setCustomers } = useHubs();
+  const { customers,backendShipments,backendShipments1,products,hubs, fetchCustomers,setCustomers,shipments } = useHubs();
 
 
   const [isModalOpen, setModalOpen] = useState(false);
@@ -36,14 +47,109 @@ function Customers() {
   const handleOpenModal = () => setModalOpen(true);
   const handleCloseModal = () => setModalOpen(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('Products');
+
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [editedAddress, setEditedAddress] = useState("");
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [editedEmail, setEditedEmail] = useState("");
+  const [isEditingAlert, setIsEditingAlert] = useState(false);
+  const [editedAlert, setEditedAlert] = useState(false);
+  const [isEditingContactPoint, setIsEditingContactPoint] = useState(false);
+  const [editedContactPoint, setEditedContactPoint] = useState("");
   const {isOpen, onOpen, onClose} = useDisclosure(); // For opening customer details
   const {isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose} = useDisclosure(); // For delete confirmation
   const [deletionId, setDeletionId] = useState(null); // State to hold the ID of the customer to be deleted
   const [isDeleting, setIsDeleting] = useState(false); // State for loading state during deletion
- 
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const { isOpen: isCustomerDetailsOpen, onOpen: onCustomerDetailsOpen, onClose: onCustomerDetailsClose } = useDisclosure();
   useEffect(() => {
     setTimeout(() => setIsLoading(false), 500);
   }, []);
+  useEffect(() => {
+    if (selectedCustomer) {
+      setEditedAddress(selectedCustomer.address || "");
+      setEditedEmail(selectedCustomer.email || "");
+      setEditedAlert(selectedCustomer.alert || false);
+      setEditedContactPoint(selectedCustomer.contactPoint || "");
+      // Initialize other fields if they exist
+    }
+  }, [selectedCustomer]);
+  const InlineEditField = ({ value, setValue, onSave, onCancel }) => {
+    const inputRef = React.useRef(null);
+  
+    useEffect(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, []);
+  
+    return (
+      <div className="flex items-center ">
+        <input 
+          ref={inputRef}
+          value={value} 
+          onChange={(e) => setValue(e.target.value)} 
+          className="mr-2 bg-transparent border-b border-gray-300 text-gray-400"
+        />
+        <span 
+          role="button" 
+          onClick={onSave}
+          className="cursor-pointer text-green-500 ml-1" 
+          style={{ width: '30px', height:'20px', display: 'inline-block', textAlign: 'center' }}>
+          ✓
+        </span>
+        <span 
+          role="button" 
+          onClick={onCancel}
+          className="cursor-pointer text-gray-500 ml-1" 
+          style={{ width: '30px', height:'20px', display: 'inline-block', textAlign: 'center' }}>
+          ✕
+        </span>
+      </div>
+    );
+  };
+  
+  const InlineTextField = ({ text, onEdit }) => (
+    <>
+      <span className="text-gray-500 cursor-pointer " onClick={onEdit}>{text}</span>
+    </>
+  );
+
+  const handleUpdateField = async (customerId, field, newValue, setEditState) => {
+    try {
+      const response = await fetch(`${backendUrl}/api/customers/${customerId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ [field]: newValue }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to update ${field}`);
+      }
+  
+      const updatedCustomer = await response.json();
+      console.log(`${field} updated:`, updatedCustomer);
+      
+      // Update the local state immediately
+      setSelectedCustomer(prevCustomer => ({
+        ...prevCustomer,
+        [field]: newValue
+      }));
+  
+      // Optionally fetchCustomers for global state update
+      await fetchCustomers();
+  
+      setEditState(false); // Exit edit mode
+    } catch (error) {
+      console.error(`Error updating ${field}:`, error.message);
+      // Optionally show error to the user, for example:
+      setErrorMessage(`Error updating ${field}: ${error.message}`);
+    }
+  };
+
   const countTrackingNumbersForCustomer = (customerId) => {
 
     return backendShipments.reduce((total, shipment) => {
@@ -70,6 +176,51 @@ function Customers() {
       return total;
     }, 0);
   };
+
+  const findMatchingShipments = (customerId) => {
+    // Step 1: Collect tracking numbers and related info from backendShipments
+    const shipmentsInfo = backendShipments.reduce((acc, shipment) => {
+      if (shipment.customer && shipment.customer === customerId) {
+        const trackingNumbers = shipment.tracking_numbers ? 
+          shipment.tracking_numbers.map(tracking => tracking.trackingNumber) 
+          : [];
+        
+        trackingNumbers.forEach(trackingNumber => {
+          acc.push({
+            trackingNumber,
+            products: shipment.products ? shipment.products.map(p => {
+              const product = products.find(prod => prod._id === p.id);
+              return {
+                id: p.id,
+                name: product ? product.name : 'Unknown Product', // Fetch product name or use a default
+                quantity: p.quantity
+              };
+            }) : [],
+            hub: shipment.hub ? (hubs.find(hub => hub._id === shipment.hub)?.name || 'Unknown Hub') : null,
+            vendor: shipment.vendor ? shipment.vendor : null,
+            createdAt: shipment.createdAt,
+            // Note: Here we're assuming we'll find a match in the shipments array later
+          });
+        });
+      }
+      return acc;
+    }, []);
+  
+    // Step 2: Find matching shipments from the 'shipments' array and merge with backendShipments info
+    const matchingShipments = shipments.reduce((result, shipment) => {
+      const matchedInfo = shipmentsInfo.find(info => info.trackingNumber === shipment.tracking_number);
+      if (matchedInfo) {
+        result.push({
+          ...matchedInfo,
+          delivery_status: shipment.delivery_status
+        });
+      }
+      return result;
+    }, []);
+  
+    return matchingShipments;
+  };
+  
   const capitalizeFirstLetter = (message) => {
     if (!message) return "";
     return message.charAt(0).toUpperCase() + message.slice(1);
@@ -135,6 +286,7 @@ function Customers() {
 
       // Update state or refetch customers
       await fetchCustomers();
+      onCustomerDetailsClose
       setErrorMessage("Customer deleted successfully.");
     } catch (error) {
       console.error("Error deleting customer:", error.message);
@@ -203,6 +355,48 @@ function Customers() {
       setLoading(false);
     }
   };
+
+  const [newNote, setNewNote] = useState(""); // State to hold the new note text
+
+  const handleAddNote = async () => {
+    if (!newNote.trim()) return; // Prevent adding empty notes
+
+    try {
+      const response = await fetch(`${backendUrl}/api/customers/${selectedCustomer._id}/add-note`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: newNote }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add note");
+      }
+
+      const data = await response.json();
+      // Update the local state to reflect the new note
+      setSelectedCustomer(prev => ({
+        ...prev,
+        comment: [...prev.comment, { text: newNote, creationdate: new Date() }]
+      }));
+      setNewNote(""); // Clear the input after adding the note
+    } catch (error) {
+      console.error("Error adding note:", error);
+      // Optionally show an error message to the user
+    }
+  };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Number of items to show per page
+  const matchingShipmentsForCustomer = findMatchingShipments(selectedCustomer?._id);
+  const totalPages = Math.ceil((matchingShipmentsForCustomer?.length || 0) / itemsPerPage);
+
+  const paginatedShipments = React.useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return matchingShipmentsForCustomer?.slice(startIndex, endIndex);
+  }, [matchingShipmentsForCustomer, currentPage]);
   return (
 
   <div className="pt-6 pl-4 pr-4 bg-zinc-900" style={{ minHeight: "100vh"}}>
@@ -462,6 +656,8 @@ function Customers() {
               const totalShipped = countTrackingNumbersForCustomer(customer._id);;
               const totalReturned =  countTrackingNumbersForCustomer2(customer._id);;
               const totalValue = 0; // Calculate if needed based on your data structure
+             
+              console.log("matchingShipmentsForCustomer",matchingShipmentsForCustomer)
 
 
         return (
@@ -472,12 +668,15 @@ function Customers() {
             transition={{ delay: index * 0.1 }}
             className="col-span-1"
           >
-           <Card disableRipple={true}  onPress={() => {
-  setSelectedHubId(customer._id);
-
-}}
-className="w-full dark border relative" // Add `relative` to position the delete icon absolutely
->
+           <Card 
+            disableRipple={true} 
+            isPressable 
+            onPress={() => {
+              setSelectedCustomer(customer);
+              onCustomerDetailsOpen();
+            }}
+            className="w-full dark border "
+          >
   <CardBody style={{ display: "flex", justifyContent: "space-between" }}>
     <div className="flex">
       <div style={{ flex: 2 }}>
@@ -505,7 +704,7 @@ className="w-full dark border relative" // Add `relative` to position the delete
       </div>
     </div>
     {/* Delete Icon positioned at the bottom right */}
-    <div className="absolute bottom-2 right-2">
+    {/* <div className="absolute bottom-2 right-2">
     <DeleteIcon 
                           onClick={(e) => { 
                             e.stopPropagation(); 
@@ -514,9 +713,170 @@ className="w-full dark border relative" // Add `relative` to position the delete
                           }} 
                           className="cursor-pointer text-red-500 w-5 h-5"
                         />
-    </div>
+    </div> */}
   </CardBody>
 </Card>
+<AnimatePresence>
+  {isCustomerDetailsOpen  && (
+    <Modal isOpen={isCustomerDetailsOpen} onClose={onCustomerDetailsClose} className="dark" size="4xl">
+      <ModalContent>
+        <ModalHeader>
+          <div className="flex justify-between items-center w-full">
+            <h2 className="text-base">{selectedCustomer.name}</h2>
+            <div className="absolute bottom-8 right-2">
+              <Button 
+                color="danger"
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  setDeletionId(selectedCustomer._id); 
+                  onDeleteOpen(); 
+                }} 
+                className="cursor-pointer z-50"
+              >
+                Delete Customer
+              </Button>
+            </div>
+          </div>
+        </ModalHeader>
+        <ModalBody style={{ minHeight: '600px' }}>
+          <div className="flex flex-col justify-center mb-4">
+            <Tabs 
+              selectedKey={activeTab} 
+              onSelectionChange={(key) => setActiveTab(key)}
+              className="w-full flex justify-center"
+            >
+              <Tab key="products" title="Products">
+          
+                <div>
+                <div className="flex text-gray-400 mb-2 item-center">
+  <p className="text-gray-200 mr-1">Address:</p>
+  {isEditingAddress ? (
+    <InlineEditField 
+      value={editedAddress} 
+      setValue={setEditedAddress} 
+      onSave={() => handleUpdateField(selectedCustomer._id, 'address', editedAddress, setIsEditingAddress)}
+      onCancel={() => setIsEditingAddress(false)}
+    />
+  ) : (
+    <InlineTextField 
+      text={selectedCustomer.address || "No Address"} 
+      onEdit={() => setIsEditingAddress(true)}
+    />
+  )}
+</div>
+<div className="flex text-gray-400 mb-2">
+  <p className="text-gray-200 mr-1">Email:</p>
+  {isEditingEmail ? (
+    <InlineEditField 
+      value={editedEmail} 
+      setValue={setEditedEmail} 
+      onSave={() => handleUpdateField(selectedCustomer._id, 'email', editedEmail, setIsEditingEmail)}
+      onCancel={() => setIsEditingEmail(false)}
+    />
+  ) : (
+    <InlineTextField 
+      text={selectedCustomer.email || "No Email"} 
+      onEdit={() => setIsEditingEmail(true)}
+    />
+  )}
+
+</div>
+<div className="mt-6">
+{matchingShipmentsForCustomer && matchingShipmentsForCustomer.length > 0 ? (
+   <>
+                              <Table 
+                                aria-label="Shipments for Customer"
+                                classNames={{
+                                  wrapper: "min-h-[200px]", // Adjust height as needed
+                                }}
+                              >
+                                <TableHeader>
+                                  <TableColumn key="trackingNumber">Tracking Number</TableColumn>
+                                  <TableColumn key="products">Products</TableColumn>
+                                  <TableColumn key="hub">Hub</TableColumn>
+                                  <TableColumn key="vendor">Vendor</TableColumn>
+                                  <TableColumn key="createdAt">Created At</TableColumn>
+                                  <TableColumn key="delivery_status">Delivery Status</TableColumn>
+                                </TableHeader>
+                                <TableBody items={matchingShipmentsForCustomer}>
+                                  {(item) => (
+                                    <TableRow key={item.trackingNumber}>
+                                      <TableCell>{item.trackingNumber}</TableCell>
+                                      <TableCell>
+                                        {item.products.map((product) => (
+                                          <div key={product.id}>{`${product.name} (Qty: ${product.quantity})`}</div>
+                                        ))}
+                                      </TableCell>
+                                      <TableCell>{item.hub}</TableCell>
+                                      <TableCell>{item.vendor || 'No Vendor'}</TableCell>
+                                      <TableCell>{new Date(item.createdAt).toLocaleString()}</TableCell>
+                                      <TableCell>{item.delivery_status}</TableCell>
+                                    </TableRow>
+                                  )}
+                                </TableBody>
+                              </Table>
+                                <div className="flex justify-center mt-4">
+                                <Pagination
+                                  total={totalPages}
+                                  page={currentPage}
+                                  onChange={(page) => setCurrentPage(page)}
+                                  showControls
+                                  showShadow
+                                  color="warning"
+                                  variant="flat"
+                                />
+                              </div>
+                                 </>
+                            ) : (
+                              <p>No shipments found for this customer.</p>
+                            )}
+</div>       
+                </div>
+              </Tab>
+              <Tab key="notes" title="Notes">
+  <div className="p-4">
+    <div className="mb-4">
+      <Input 
+        value={newNote}
+        
+        onChange={(e) => setNewNote(e.target.value)}
+        placeholder="Add a new note..."
+        onPressEnter={handleAddNote} // Add note on Enter key press
+        endContent={
+          <Button 
+            color="waring" 
+            variant="solid" 
+            size="sm" 
+            onClick={handleAddNote}
+          >
+            Add
+          </Button>
+        }
+      />
+    </div>
+    <div className="overflow-y-auto max-h-[380px] pr-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      {selectedCustomer && selectedCustomer.comment && selectedCustomer.comment.length > 0 ? (
+        selectedCustomer.comment
+          .sort((a, b) => new Date(b.creationdate) - new Date(a.creationdate))
+          .map((comment, index) => (
+            <div key={index} className="mb-2 border rounded-xl p-3 bg-zinc-950">
+              <p className="text-gray-200">{comment.text}</p>
+              <p className="text-xs text-gray-500">{new Date(comment.creationdate).toLocaleString()}</p>
+            </div>
+          ))
+      ) : (
+        <p className="text-gray-400">No comments available.</p>
+      )}
+    </div>
+  </div>
+</Tab>
+            </Tabs>
+          </div>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
+  )}
+</AnimatePresence>
           </motion.div>
         );
       })}
