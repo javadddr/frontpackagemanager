@@ -44,6 +44,7 @@ export default function BillingPage() {
   const handleSelectPlan = (shipments) => {
     // Set the selected one-time plan and reset the unlimited plan to null
     setSelectedPlan(shipments);
+    submitTextRecord(`Selected plan: ${shipments} ${localStorage.getItem("user")} shipments-app`);
     setSelectedUnlimitedPlan(null);
   };
   const handleSendRequest = () => {
@@ -77,6 +78,31 @@ export default function BillingPage() {
       });
   };
   
+
+
+
+  const submitTextRecord = async (text) => {
+    const apiUrl = "https://api.dynamopackage.com/api/textrecords";
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to submit text: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log("Text recorded successfully:", result);
+    } catch (error) {
+      console.error("Error:", error.message);
+    }
+  };
+
   const handleSelectUnlimitedPlan = (shipments) => {
     // Set the selected one-time plan and reset the unlimited plan to null
     setSelectedUnlimitedPlan("unlimited")
