@@ -105,8 +105,10 @@ export default function BillingPage() {
   };
 
   const handleSelectUnlimitedPlan = (shipments) => {
-    // Set the selected one-time plan and reset the unlimited plan to null
+    
     setSelectedUnlimitedPlan("unlimited")
+    const user = JSON.parse(localStorage.getItem("user"));
+    submitTextRecord(`Selected plan: "unlimited" ${user.email} shipments-app`);
     setSelectedPlan(null);
   };
   // Function to format the shipments as "1k", "5k", etc.
