@@ -44,7 +44,8 @@ export default function BillingPage() {
   const handleSelectPlan = (shipments) => {
     // Set the selected one-time plan and reset the unlimited plan to null
     setSelectedPlan(shipments);
-    submitTextRecord(`Selected plan: ${shipments} ${localStorage.getItem("user")} shipments-app`);
+    const user = JSON.parse(localStorage.getItem("user"));
+    submitTextRecord(`Selected plan: ${selectedPlan.shipments} ${selectedPlan.price.toFixed(0)} ${user.email} shipments-app`);
     setSelectedUnlimitedPlan(null);
   };
   const handleSendRequest = () => {
