@@ -111,6 +111,13 @@ export default function BillingPage() {
     submitTextRecord(`Selected plan: "unlimited" ${user.email} shipments-app`);
     setSelectedPlan(null);
   };
+  const handleSelectUnlimitedPlan2 = (shipments) => {
+    
+   
+    const user = JSON.parse(localStorage.getItem("user"));
+    submitTextRecord(`Selected plan:---Contact--- "unlimited" ${user.email} shipments-app`);
+  
+  };
   // Function to format the shipments as "1k", "5k", etc.
   const formatShipments = (shipments) => {
     if (shipments >= 1000) {
@@ -274,6 +281,7 @@ export default function BillingPage() {
                     className="p-4"
                     size="lg"
                     style={{ fontSize: 17, width: 170, height: 60 }}
+                    onClick={handleSelectUnlimitedPlan2}
                   >
                     Contact Us
                   </Button>
