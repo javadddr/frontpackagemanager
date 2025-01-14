@@ -448,6 +448,8 @@ const Login = () => {
   onError={() => {
     console.log('Login Failed');
   }}
+  theme="filled_blue"
+ 
 />;
 </div>
           </div>

@@ -8,10 +8,10 @@ import './index.css';
 import App from './App.jsx';
 import 'rsuite/dist/rsuite.min.css'; 
 import { GoogleOAuthProvider } from '@react-oauth/google';
-const CLIENT_ID="780460562757-c8haartfknsrf431s28kseis3dlv2efa.apps.googleusercontent.com"
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId={CLIENT_ID}>
+     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
     <NextUIProvider theme={{ type: 'dark' }}>
     <CustomProvider >
       <Router> 
