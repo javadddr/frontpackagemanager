@@ -492,6 +492,7 @@ const Register = () => {
     console.log('Login Failed');
   }}
   auto_select={true}
+  theme="filled_blue"
 />;
 </div>
         </div>
