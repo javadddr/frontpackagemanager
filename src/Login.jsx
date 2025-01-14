@@ -459,7 +459,7 @@ const Login = () => {
           <div className="greenSquare2"></div>
         </div>
  
-        <div  style={{marginTop:'47px'}}>
+        <div  >
         <Footerlogin/>
         </div>
 
