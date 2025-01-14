@@ -233,13 +233,7 @@ const determineCellColor = (day) => {
   <ConfigProvider
     theme={{
       token: {
-        // Seed Token
         colorPrimary: 'white',
-   
-  
-
-
-        // Alias Token
         colorBgContainer: '#18181B',
       },
     }}

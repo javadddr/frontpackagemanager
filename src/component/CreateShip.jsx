@@ -14,7 +14,8 @@ const CreateShip = ({ handleCloseModal,fetchShipments,setProgress,setMessages, s
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [selectedHubId, setSelectedHubId] = useState(null);
   const [selectedProducts, setSelectedProducts] = useState([]);
-
+  const [selectedOrder, setSelectedOrder] = useState(null);
+console.log("selectedOrder",selectedOrder)
   const [notify, setNotify] = useState({
     shipper: false,
     receiver: false
@@ -119,6 +120,8 @@ useEffect(() => {
       setSelectedCustomerId={setSelectedCustomerId}
       setSelectedHubId={setSelectedHubId}
       setSelectedProducts={setSelectedProducts}
+      selectedOrder={selectedOrder}
+      setSelectedOrder={setSelectedOrder}
 
       />,
     },
@@ -198,7 +201,7 @@ useEffect(() => {
     let submitted = 0;
   
     setPopupVisible(true);
-    setOpen(true)
+    setOpen(true);
     handleCloseModal();
     setMessages([]); // Clear previous messages
   
@@ -221,7 +224,7 @@ useEffect(() => {
       // Process tracking numbers
       for (let trackInfo of finalTrack) {
         setMessages(prev => [...prev, `Submitting tracking: ${trackInfo["tracking number"]}`]);
-    
+        
         const requestOptions = {
           method: 'POST',
           headers: {
@@ -233,7 +236,7 @@ useEffect(() => {
             courier_code: trackInfo["courier"]
           }),
         };
-    
+  
         try {
           const response = await fetch('https://api2.globalpackagetracker.com/shipment/create', requestOptions);
           const data = await response.json();
@@ -256,44 +259,69 @@ useEffect(() => {
           ));
         }
       }
-
-       // Update product inventory for each selected product
-    if (selectedProducts.length > 0) {
-      const currentDate = new Date().toISOString();
-      const recipient = [selectedCustomerId, selectedVendorId].filter(Boolean).join('&');
-
-      for (let product of selectedProducts) {
-        const moveResponse = await fetch(`${backendUrl}/api/products/${product.id}/move`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'owner': key
-          },
-          body: JSON.stringify({
-            "date": currentDate,
-            "value": product.quantity,
-            "status": "out",
-            "recipient": selectedCustomerId ? selectedCustomerId : selectedVendorId ? selectedVendorId : "none"
-          })
-        });
-
-        if (!moveResponse.ok) {
-          const errorData = await moveResponse.json();
-          console.error(`Failed to update inventory for product ${product.id}:`, errorData.message);
-          // Optionally, add this error to your messages or handle it as you see fit
+  
+      // Update product inventory for each selected product
+      if (selectedProducts.length > 0) {
+        const currentDate = new Date().toISOString();
+        const recipient = [selectedCustomerId, selectedVendorId].filter(Boolean).join('&');
+  
+        for (let product of selectedProducts) {
+          const moveResponse = await fetch(`${backendUrl}/api/products/${product.id}/move`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'owner': key
+            },
+            body: JSON.stringify({
+              "date": currentDate,
+              "value": product.quantity,
+              "status": "out",
+              "recipient": selectedCustomerId ? selectedCustomerId : selectedVendorId ? selectedVendorId : "none"
+            })
+          });
+  
+          if (!moveResponse.ok) {
+            const errorData = await moveResponse.json();
+            console.error(`Failed to update inventory for product ${product.id}:`, errorData.message);
+            // Optionally, add this error to your messages or handle it as you see fit
+          }
         }
       }
-    }
-
+  
+      // Add tracking numbers to the order
+      if (selectedOrder && selectedOrder._id) {
+        const trackingNumbersToAdd = finalTrack.map(trackInfo => ({
+          trackingNumber: trackInfo["tracking number"],
+          courier: trackInfo["courier"]
+        }));
+  
+        const addTrackingResponse = await fetch(`${backendUrl}/api/orders/${selectedOrder._id}/add-tracking`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ tracking_numbers: trackingNumbersToAdd })
+        });
+  
+        if (!addTrackingResponse.ok) {
+          const errorData = await addTrackingResponse.json();
+          console.error('Failed to add tracking numbers to order:', errorData.message);
+          // Optionally, you could add this error to your messages or handle it as needed
+        } else {
+          const successData = await addTrackingResponse.json();
+          console.log('Tracking numbers added to order:', successData);
+          // Optionally, add success message to the UI
+          setMessages(prev => [...prev, 'Tracking numbers added to the order successfully']);
+        }
+      }
+  
       const updatedShipments = await fetchShipments();
   
       setShipments(updatedShipments);
       await fetchBackendShipments();
       await fetchBackendShipments1();
       await fetchBackendShipments2();
-      // After processing all tracking numbers
-  
-   
+      
       setFinalTrack([]);
       setTrackingNumbers([]);
       setProgress(100); // Ensure progress is at 100%

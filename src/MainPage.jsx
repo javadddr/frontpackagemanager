@@ -6,6 +6,8 @@ import Loading from "./Loading";
 import logocompany  from "./dynamologo1.png"
 import { IoMdLogOut } from "react-icons/io";
 import { GrCapacity } from "react-icons/gr";
+import Orders from "./Orders";
+import { LiaFileInvoiceDollarSolid } from "react-icons/lia";
 import { MdOutlineContactMail } from "react-icons/md";
 import {
   Modal,
@@ -75,6 +77,7 @@ const MainPage = () => {
     ],
   },
     { label: "Inventory", key: "4", icon: <TbPackages style={{ fontSize: "26px" }} /> },
+    { label: "Orders", key: "9", icon: <LiaFileInvoiceDollarSolid style={{ fontSize: "26px" }} /> },
     {
       label: "Locations",
       key: "5",
@@ -85,7 +88,7 @@ const MainPage = () => {
         { label: "Customers", key: "5-3" },
       ],
     },
-    { label: `Capacity: ${userData?.capacity || 0}`, key: "6" ,style: { backgroundColor: "#12A150",color:"black",fontSize:"14px",marginTop:"370px",height:"25px",textAlign:"start" }, icon: <GrCapacity style={{ fontSize: "19px",height:"30px" }} /> },
+    { label: `Capacity: ${userData?.capacity || 0}`, key: "6" ,style: { backgroundColor: "#12A150",color:"black",fontSize:"14px",marginTop:"330px",height:"25px",textAlign:"start" }, icon: <GrCapacity style={{ fontSize: "19px",height:"30px" }} /> },
     { label: "Contact us", key: "7",style: { backgroundColor: "#09AACD",color:"black",fontSize:"14px" ,height:"25px",textAlign:"start"}, icon: <MdOutlineContactMail style={{ fontSize: "19px",height:"30px" }} /> },
     { label: "Log out", key: "8",style: { backgroundColor: "#936316",color:"black",fontSize:"14px" ,height:"25px",textAlign:"start"}, icon: <IoMdLogOut style={{ fontSize: "19px",height:"30px" }} /> },
   ];
@@ -228,10 +231,11 @@ useEffect(() => {
       case "3-1":
         return <CusReturn/>;
         case "3-2":
-        return <VenReturn/>;
+        return <VenReturn/>;Orders
       case "4":
         return <Inventory productStats={productStats}/>;
-    
+      case "9":
+          return <Orders/>;
       case "5-1":
         return <Hubs />;
       case "5-2":

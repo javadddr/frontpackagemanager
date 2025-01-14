@@ -16,7 +16,7 @@ export const HubsProvider = ({ children }) => {
   const [vendors, setVendors] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [shipments, setShipments] = useState([]);
-
+  const [orders, setOrders] = useState([]);
   const [backendShipments, setBackendShipments] = useState([]);
   const [backendShipments1, setBackendShipments1] = useState([]);
   const [backendShipments2, setBackendShipments2] = useState([]);
@@ -347,6 +347,34 @@ const filterTotalReturn = () => {
     setTotalReturn([]); // If any of the arrays are not ready, reset to empty
   }
 };
+
+// Function to fetch orders
+const fetchOrders = async () => {
+  try {
+    const ownerKey = localStorage.getItem("key"); // Retrieve owner key from local storage
+    if (!ownerKey) {
+      throw new Error("Owner key is missing from local storage.");
+    }
+
+    const response = await fetch(`${backendUrl}/api/orders`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-owner": ownerKey, // Pass owner key in headers
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to fetch orders");
+    }
+
+    const ordersData = await response.json();
+    setOrders(ordersData); // Update orders state
+  } catch (error) {
+    console.error("Error fetching orders:", error.message);
+  }
+};
 useEffect(() => {
   const fetchData = async () => {
     try {
@@ -358,7 +386,7 @@ useEffect(() => {
       await fetchBackendShipments();
       await fetchBackendShipments1(); 
       await fetchBackendShipments2();
-      
+      await fetchOrders();
       if (Array.isArray(shipments) && Array.isArray(backendShipments)) filterShipped();
       if (Array.isArray(shipments) && Array.isArray(backendShipments1)) filterReturnedCus();
       if (Array.isArray(shipments) && Array.isArray(backendShipments2)) filterReturnVen();
@@ -401,9 +429,9 @@ useEffect(() => {
 }, [shipments, backendShipments1, backendShipments2]);
   return (
     <HubsContext.Provider value={{ 
-      hubs, products, vendors, customers, shipments, returnedCus, returnVen,totalReturn, backendShipments,backendShipments1,backendShipments2,shipped, otherShipments, // Add customers here
-      fetchHubs, fetchProducts, fetchVendors, fetchCustomers,fetchShipments, fetchBackendShipments,fetchBackendShipments1,fetchBackendShipments2, // Include fetchCustomers
-      setHubs, setProducts, setVendors, setCustomers,setShipments, setBackendShipments, setBackendShipments1, setBackendShipments2  // Include setCustomers
+      hubs, products, vendors, customers, shipments, returnedCus, returnVen,totalReturn, backendShipments,backendShipments1,backendShipments2,shipped, otherShipments,orders, // Add customers here
+      fetchHubs, fetchProducts, fetchVendors, fetchCustomers,fetchShipments, fetchBackendShipments,fetchBackendShipments1,fetchBackendShipments2, fetchOrders, // Include fetchCustomers
+      setHubs, setProducts, setVendors, setCustomers,setShipments, setBackendShipments, setBackendShipments1, setBackendShipments2, setOrders  // Include setCustomers
     }}>
       {children}
     </HubsContext.Provider>

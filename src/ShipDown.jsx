@@ -26,12 +26,12 @@ import Map from './Map';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 function ShipDown({shipments,shipped,otherShipments, fetchShipments,backendShipments, showcal = true}) {
 
-
+  const { customers,vendors,hubs,fetchBackendShipments,orders} = useHubs();
 
   const [checkedShipments, setCheckedShipments] = useState([]);
 
 
-
+  const [selectedShipment, setSelectedShipment] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     if (otherShipments && backendShipments) {
@@ -86,6 +86,24 @@ const [shipmentToDelete, setShipmentToDelete] = useState(null);
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
+  function findCustomerByTrackingNumber(backendShipments, trackingNumber) {
+    // Find the shipment that has the specified tracking number
+    const shipment = backendShipments.find(shipment => 
+      shipment.tracking_numbers.some(tn => tn.trackingNumber === trackingNumber)
+    );
+  
+    if (shipment && shipment.customer) {
+      // Find the customer by matching the ID
+      const customer = customers.find(cust => cust._id === shipment.customer);
+      return customer ? customer.name : "Customer not found";
+    }
+  
+    // No matching shipment or no customer in the shipment
+    return "No customer found";
+  }
+
+
+
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
@@ -138,52 +156,39 @@ useEffect(() => {
   if (searchTerm.length > 0) {
     const searchTermLower = searchTerm.toLowerCase();
     tempShipments = tempShipments.filter(shipment => {
+      const matchingOrder = orders.find(order => 
+        order.tracking_numbers && order.tracking_numbers.some(tn => tn.trackingNumber === shipment.tracking_number)
+      );
+
       const fields = [
         shipment.tracking_number.toLowerCase(), 
         shipment.courier_code.toLowerCase(), 
         shipment.origin ? shipment.origin.toLowerCase() : '', 
         shipment.shipping_info?.shipper_address?.city ? shipment.shipping_info.shipper_address.city.toLowerCase() : '',
         shipment.shipping_info?.recipient_address?.city ? shipment.shipping_info.recipient_address.city.toLowerCase() : '',
-        shipment.delivery_status.toLowerCase()
+        shipment.delivery_status.toLowerCase(),
+        findCustomerByTrackingNumber(backendShipments, shipment.tracking_number).toLowerCase(),
+        // Add new fields for filtering:
+        matchingOrder ? matchingOrder.invoiceNumber?.toLowerCase() : '',
+        matchingOrder ? matchingOrder.internalPO?.toLowerCase() : '',
+        matchingOrder ? matchingOrder.orderId?.toLowerCase() : ''
       ];
+
       return fields.some(field => field.includes(searchTermLower));
     });
   }
-  const deliveredCount = otherShipments.reduce((count, shipment) => {
-    // Note: JavaScript is case-sensitive, so make sure the comparison matches exactly
-    if (shipment.delivery_status && shipment.delivery_status === 'Delivered') {
-      return count + 1;
-    }
-    return count;
-  }, 0);
-  const tranCount = otherShipments.reduce((count, shipment) => {
-    // Note: JavaScript is case-sensitive, so make sure the comparison matches exactly
-    if (shipment.delivery_status && shipment.delivery_status === 'Transit') {
-      return count + 1;
-    }
-    return count;
-  }, 0);
-  const exCount = otherShipments.reduce((count, shipment) => {
-    // Note: JavaScript is case-sensitive, so make sure the comparison matches exactly
-    if (shipment.delivery_status && shipment.delivery_status === 'Exception') {
-      return count + 1;
-    }
-    return count;
-  }, 0);
-  const creaCount = otherShipments.reduce((count, shipment) => {
-    // Note: JavaScript is case-sensitive, so make sure the comparison matches exactly
-    if (shipment.delivery_status && shipment.delivery_status === 'Created') {
-      return count + 1;
-    }
-    return count;
-  }, 0);
-  const penCount = otherShipments.reduce((count, shipment) => {
-    // Note: JavaScript is case-sensitive, so make sure the comparison matches exactly
-    if (shipment.delivery_status && shipment.delivery_status === 'Pending') {
-      return count + 1;
-    }
-    return count;
-  }, 0);
+  
+  // Update counts and filtered shipments
+  const deliveredCount = tempShipments.reduce((count, shipment) => 
+    shipment.delivery_status === 'Delivered' ? count + 1 : count, 0);
+  const tranCount = tempShipments.reduce((count, shipment) => 
+    shipment.delivery_status === 'Transit' ? count + 1 : count, 0);
+  const exCount = tempShipments.reduce((count, shipment) => 
+    shipment.delivery_status === 'Exception' ? count + 1 : count, 0);
+  const creaCount = tempShipments.reduce((count, shipment) => 
+    shipment.delivery_status === 'Created' ? count + 1 : count, 0);
+  const penCount = tempShipments.reduce((count, shipment) => 
+    shipment.delivery_status === 'Pending' ? count + 1 : count, 0);
 
   settranCount(tranCount)
   setexCount(exCount)
@@ -191,10 +196,7 @@ useEffect(() => {
   setpenCount(penCount)
   setDeliveredCount(deliveredCount)
   setFilteredShipments(tempShipments);
-  setFinalShipments((prev) => {
-    // Return the filtered shipments directly
-    return tempShipments;
-  });
+  setFinalShipments(tempShipments);
 
   // Calendar part - Update shipping dates
   if (tempShipments.length > 0) {
@@ -209,8 +211,7 @@ useEffect(() => {
     setShippingDates(new Set());
   }
 
-}, [checkedShipments, selected, selectedRange, searchTerm]);
-
+}, [checkedShipments, selected, selectedRange, searchTerm, orders, backendShipments]);
 
 
 
@@ -259,93 +260,164 @@ useEffect(() => {
   setTimeout(() => setIsLoading(false), 500);
 }, [otherShipments]);
 
-const API_KEY = "ec4c34fa267ecb856f4eb5b11d5f0e81";
-const BASE_URL = "https://api.openweathermap.org/geo/1.0/direct";
+// const API_KEY = "dd";
+// const BASE_URL = "https://api.openweathermap.org/geo/1.0/direct";
 
+// const handleEditMap = async (id) => {
+//   const travelHistory = id.travel_history;
+//   const deliveryStatus = id.delivery_status;
+
+//   console.log("travelHistory", travelHistory);
+
+//   if (travelHistory && travelHistory.length > 0) {
+//     // Convert travel history into the route format and filter out null postal codes
+//     const route = travelHistory
+//       .map((event) => {
+//         let cityOrState = event.location
+//           ? event.location.split(",").pop().trim()
+//           : event.state || "Unknown";
+
+//         if (cityOrState.length > 2) {
+//           cityOrState = event.state || "Unknown"; // Use state if location is not just the state
+//         }
+
+//         return {
+//           name: cityOrState,
+//           postalCode: event.postal_code || null,
+//           location: event.location,
+//         };
+//       })
+//       .filter((event) => event.postalCode !== null) // Filter out events with null postal codes
+//       .reverse();
+
+//     // Set isStart and isFinish/isTransit
+//     if (route.length > 0) {
+//       route[0].isStart = true;
+
+//       switch (deliveryStatus) {
+//         case "Delivered":
+//           route[route.length - 1].isFinish = true;
+//           break;
+//         case "Transit":
+//           route[route.length - 1].isTransit = true;
+//           break;
+//         case "Exception":
+//           route[route.length - 1].isException = true;
+//           break;
+//         default:
+//           route[route.length - 1].isTransit = true; // Default to Transit
+//       }
+//     }
+
+//     const routes = [route];
+
+//     // Fetch coordinates
+//     const locationCoordinates = [];
+//     for (const entry of travelHistory) {
+//       const location = entry.location;
+
+//       // Skip duplicates
+//       if (locationCoordinates.some((item) => item.location === location)) {
+//         continue;
+//       }
+
+//       try {
+//         const response = await fetch(
+//           `${BASE_URL}?q=${encodeURIComponent(location)}&limit=1&appid=${API_KEY}`
+//         );
+//         const data = await response.json();
+
+//         if (data && data.length > 0) {
+//           const { lat, lon } = data[0];
+//           locationCoordinates.push({ location, coordinates: [lon, lat] });
+//         } else {
+//           console.warn(`No coordinates found for ${location}`);
+//         }
+//       } catch (error) {
+//         console.error(`Error fetching coordinates for ${location}:`, error);
+//       }
+//     }
+
+//     // Log final coordinates and set state
+//     console.log("Coordinates for locations:", locationCoordinates);
+
+//     // Ensure these functions exist in the parent component
+//     setCoordinates(locationCoordinates);
+//     setShipmentToMap(routes);
+//     onMapOpen();
+//   }
+// };
 const handleEdit = async (id) => {
-  const travelHistory = id.travel_history;
-  const deliveryStatus = id.delivery_status;
+  const trackingNumber = id.tracking_number;
+  console.log('Tracking number to find:', trackingNumber);
 
-  console.log("travelHistory", travelHistory);
+  // Find the shipment with the matching tracking number
+  const matchingShipment = backendShipments.find(shipment => 
+    shipment.tracking_numbers.some(tn => tn.trackingNumber === trackingNumber)
+  );
 
-  if (travelHistory && travelHistory.length > 0) {
-    // Convert travel history into the route format and filter out null postal codes
-    const route = travelHistory
-      .map((event) => {
-        let cityOrState = event.location
-          ? event.location.split(",").pop().trim()
-          : event.state || "Unknown";
-
-        if (cityOrState.length > 2) {
-          cityOrState = event.state || "Unknown"; // Use state if location is not just the state
-        }
-
-        return {
-          name: cityOrState,
-          postalCode: event.postal_code || null,
-          location: event.location,
-        };
-      })
-      .filter((event) => event.postalCode !== null) // Filter out events with null postal codes
-      .reverse();
-
-    // Set isStart and isFinish/isTransit
-    if (route.length > 0) {
-      route[0].isStart = true;
-
-      switch (deliveryStatus) {
-        case "Delivered":
-          route[route.length - 1].isFinish = true;
-          break;
-        case "Transit":
-          route[route.length - 1].isTransit = true;
-          break;
-        case "Exception":
-          route[route.length - 1].isException = true;
-          break;
-        default:
-          route[route.length - 1].isTransit = true; // Default to Transit
-      }
-    }
-
-    const routes = [route];
-
-    // Fetch coordinates
-    const locationCoordinates = [];
-    for (const entry of travelHistory) {
-      const location = entry.location;
-
-      // Skip duplicates
-      if (locationCoordinates.some((item) => item.location === location)) {
-        continue;
-      }
-
-      try {
-        const response = await fetch(
-          `${BASE_URL}?q=${encodeURIComponent(location)}&limit=1&appid=${API_KEY}`
-        );
-        const data = await response.json();
-
-        if (data && data.length > 0) {
-          const { lat, lon } = data[0];
-          locationCoordinates.push({ location, coordinates: [lon, lat] });
-        } else {
-          console.warn(`No coordinates found for ${location}`);
-        }
-      } catch (error) {
-        console.error(`Error fetching coordinates for ${location}:`, error);
-      }
-    }
-
-    // Log final coordinates and set state
-    console.log("Coordinates for locations:", locationCoordinates);
-
-    // Ensure these functions exist in the parent component
-    setCoordinates(locationCoordinates);
-    setShipmentToMap(routes);
-    onMapOpen();
+  if (matchingShipment) {
+    console.log('Matching shipment found:', matchingShipment);
+    setSelectedShipment(matchingShipment); // Store in state
+    onMapOpenChange(true);  // Open modal with the shipment details
+  } else {
+    console.log('No matching shipment found for tracking number:', trackingNumber);
+    setSelectedShipment(null); // Reset if no match found
   }
 };
+
+const [selectedHub, setSelectedHub] = useState('');
+  const [selectedVendor, setSelectedVendor] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState('');
+
+  useEffect(() => {
+    if (selectedShipment) {
+      setSelectedHub(selectedShipment.hub || '');
+      setSelectedVendor(selectedShipment.vendor || '');
+      setSelectedCustomer(selectedShipment.customer || '');
+    }
+  }, [selectedShipment]);
+
+  // Update this function to include the update logic
+  const handleUpdateShipment = async () => {
+    if (!selectedShipment) return;
+
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/api/shipments/${selectedShipment._id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'owner': localStorage.getItem("key") // Assuming 'owner' header is used
+        },
+        body: JSON.stringify({
+          hub: selectedHub || null,
+          vendor: selectedVendor || null,
+          customer: selectedCustomer || null
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update shipment');
+      }
+
+      const updatedShipment = await response.json();
+      console.log('Shipment updated:', updatedShipment);
+
+      // Re-fetch shipments or update local state to reflect changes
+      await fetchBackendShipments();
+
+      // Optionally close the modal or show success message
+      onMapOpenChange(false);
+    } catch (error) {
+      console.error('Error updating shipment:', error);
+      // Show error message to user
+    }
+  };
+
+
+
+
 
   return (
     <div >
@@ -408,12 +480,14 @@ const handleEdit = async (id) => {
       <Input
         isClearable
         radius="lg"
+      
+        style={{color:"white"}}
         classNames={{
           label: "text-black/50 dark:text-white/90 ",
           input: [
-            "bg-gray",
-            "text-black/90 dark:text-white/90",
-            "placeholder:text-default-50/50 dark:placeholder:text-white/90",
+            "bg-gray-800",
+            "text-base", // Changed to white and larger text
+        "flex",
           ],
           innerWrapper: "bg-transparent",
           inputWrapper: [
@@ -422,12 +496,13 @@ const handleEdit = async (id) => {
             "dark:bg-default/60",
             "backdrop-blur-xl",
             "backdrop-saturate-200",
-        
-            "group-data-[focus=true]:bg-default-200/50",
+            
+            "group-data-[focus=true]:bg-default-600/50",
             "dark:group-data-[focus=true]:bg-default/60",
-            "group-data-[hover=true]:bg-default-200/50",
+            "group-data-[hover=true]:bg-default-600/50",
             "dark:group-data-[hover=true]:bg-default/60",
             "!cursor-text",
+            "max-w-[240px]",
           ],
         }}
         placeholder="Type to search..."
@@ -435,7 +510,7 @@ const handleEdit = async (id) => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         startContent={
-          <SearchIcon className="text-black/50  dark:text-white/90 text-slate-100 pointer-events-none flex-shrink-0" />
+          <SearchIcon className="w-5 h-5 text-white pointer-events-none flex-shrink-0" />
         }
       />
    
@@ -457,7 +532,7 @@ const handleEdit = async (id) => {
             >
               <Card className='border border-gray-700 dark '>
               <CardBody className='dark'>
-    <div className="grid grid-cols-[30%_30%_30%_10%] gap-4">
+    <div className="grid grid-cols-[20%_20%_20%_25%_5%] gap-5">
       <div>
         <h3 className=" flex items-center">
           <Package size={20} className="mr-2 text-gray-600  " /><span className='text-sm font-light'>{shipment.tracking_number}</span>
@@ -476,10 +551,11 @@ const handleEdit = async (id) => {
 
         <p className="flex items-center"><Clock size={20} className="mr-2 text-gray-600" /><span className='text-gray-500 mr-1'>Transit Time: </span> {shipment.transit_time ? `${shipment.transit_time} days` : 'No data available'}</p>
         <p className="flex items-center"><MapPin size={20} className="mr-2 text-gray-600" /><span className='text-gray-500 mr-1'>Route:</span>  {shipment.origin || 'Not available'}   {shipment.origin ? <TbSquareArrowRight className='ml-1 mr-1' />:""} {shipment.destination || ''}</p>
+
+
       </div>
       <div>
-
-        <p className="flex items-center"><User size={20} className="mr-2 text-gray-600" /><span className='text-gray-500 mr-1'>Customer:  </span>{shipment.customer || 'No data available'}</p>
+      <p className="flex items-center"><User size={20} className="mr-2 text-gray-600" /><span className='text-gray-500 mr-1'>Customer: </span>{findCustomerByTrackingNumber(backendShipments, shipment.tracking_number)}</p>
         <p className="flex items-center">
           <Tag size={20} className="mr-2 text-gray-600" />
           <span className='text-gray-500 mr-1'>Shipped From: </span>
@@ -495,25 +571,42 @@ const handleEdit = async (id) => {
             : 'No data available'}
         </p>
       </div>
-    
-  <div className="w-[40%] flex flex-col justify-center items-center">
-  <p className="flex items-center -ml-4 ">{shipment.delivery_status || '-'}</p>
-    {shipment.delivery_status === 'Transit' && (
-      <img src={logo1} alt="In Transit" className="w-full h-auto" />
-    )}
-    {shipment.delivery_status === 'Exception' && (
-      <img src={logo3} alt="Exception" className="w-full h-auto" />
-    )}
-    {shipment.delivery_status === 'Delivered' && (
-      <img src={logo} alt="Delivered" className="w-full h-auto" />
-    )}
-    {shipment.delivery_status === 'Pending' && (
-      <img src={logo40} alt="Pending" className="w-full h-auto" />
-    )}
-    {shipment.delivery_status !== 'Transit' && shipment.delivery_status !== 'Exception' && shipment.delivery_status !== 'Pending' && shipment.delivery_status !== 'Delivered' && (
-      <img src={logo2} alt="Other Status" className="w-full h-auto" />
-    )}
-  </div>
+      <div className="flex flex-col pl-4">
+      <p className="flex items-center">
+        <User size={20} className="mr-2 text-gray-600" />
+        <span className='text-gray-500 mr-1'>Invoice Number: </span> 
+{orders.find(order => 
+  order.tracking_numbers && order.tracking_numbers.some(tn => tn.trackingNumber === shipment.tracking_number)
+)?.invoiceNumber || 'No Invoice Number'}
+      </p>
+
+        <p className="flex items-center"><Clock size={20} className="mr-2 text-gray-600" /><span className='text-gray-500 mr-1'>Internal PO:  </span> {orders.find(order => 
+  order.tracking_numbers && order.tracking_numbers.some(tn => tn.trackingNumber === shipment.tracking_number)
+)?.internalPO || 'No Invoice Number'}</p>
+        <p className="flex items-center"><MapPin size={20} className="mr-2 text-gray-600" /><span className='text-gray-500 mr-1'>Order ID: </span>  {orders.find(order => 
+  order.tracking_numbers && order.tracking_numbers.some(tn => tn.trackingNumber === shipment.tracking_number)
+)?.orderId || 'No Invoice Number'}</p>
+
+        
+      </div>
+        <div className="w-[90%] flex flex-col justify-center items-center">
+        <p className="flex items-center -ml-4 ">{shipment.delivery_status || '-'}</p>
+          {shipment.delivery_status === 'Transit' && (
+            <img src={logo1} alt="In Transit" className="w-full h-auto" />
+          )}
+          {shipment.delivery_status === 'Exception' && (
+            <img src={logo3} alt="Exception" className="w-full h-auto" />
+          )}
+          {shipment.delivery_status === 'Delivered' && (
+            <img src={logo} alt="Delivered" className="w-full h-auto" />
+          )}
+          {shipment.delivery_status === 'Pending' && (
+            <img src={logo40} alt="Pending" className="w-full h-auto" />
+          )}
+          {shipment.delivery_status !== 'Transit' && shipment.delivery_status !== 'Exception' && shipment.delivery_status !== 'Pending' && shipment.delivery_status !== 'Delivered' && (
+            <img src={logo2} alt="Other Status" className="w-full h-auto" />
+          )}
+        </div>
     </div>
   </CardBody>
                 <CardFooter className="flex justify-between dark items-center">
@@ -627,6 +720,15 @@ const handleEdit = async (id) => {
                     >
                       <DeleteIcon className="w-5 h-5"/>
                     </Button>
+        <Button 
+          isIconOnly 
+          variant="light" 
+          color="primary" 
+          aria-label="Edit"
+          onClick={() => handleEdit(shipment)}
+        >
+          <EditIcon className="w-6 h-6"/>
+        </Button>
         {/* <Button 
           isIconOnly 
           variant="light" 
@@ -676,16 +778,61 @@ const handleEdit = async (id) => {
       </ModalFooter>
     </ModalContent>
       </Modal>
-      <Modal isOpen={isMapOpen} onOpenChange={onMapOpenChange} size="4xl" className='dark'>
+      <Modal isOpen={isMapOpen} onOpenChange={onMapOpenChange} size="xl" className='dark'>
         <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">Shipment Map</ModalHeader>
+          <ModalHeader className="flex flex-col gap-1">Shipment Details</ModalHeader>
           <ModalBody>
-            {shipmentToMap && <Map routes={shipmentToMap} coordinateso={coordinates} />}
-            {console.log("shipmentToMapIIIIIIII",shipmentToMap)}
+            {selectedShipment && (
+              <>
+                <p><strong>Tracking Number:</strong> {selectedShipment.tracking_numbers[0].trackingNumber}</p>
+                <div className="flex items-center mb-2">
+                  <strong>Hub:</strong>
+                  <select 
+                    className="ml-2 p-1 bg-gray-700 text-white rounded"
+                    value={selectedHub}
+                    onChange={(e) => setSelectedHub(e.target.value)}
+                  >
+                    <option value="">{selectedHub || 'Not specified'}</option>
+                    {hubs.map(hub => (
+                      <option key={hub._id} value={hub._id}>{hub.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center mb-2">
+                  <strong>Vendor:</strong>
+                  <select 
+                    className="ml-2 p-1 bg-gray-700 text-white rounded"
+                    value={selectedVendor}
+                    onChange={(e) => setSelectedVendor(e.target.value)}
+                  >
+                    <option value="">{selectedVendor || 'Not specified'}</option>
+                    {vendors.map(vendor => (
+                      <option key={vendor._id} value={vendor._id}>{vendor.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center mb-2">
+                  <strong>Customer:</strong>
+                  <select 
+                    className="ml-2 p-1 bg-gray-700 text-white rounded"
+                    value={selectedCustomer}
+                    onChange={(e) => setSelectedCustomer(e.target.value)}
+                  >
+                    <option value="">{selectedCustomer || 'Not specified'}</option>
+                    {customers.map(customer => (
+                      <option key={customer._id} value={customer._id}>{customer.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
           </ModalBody>
           <ModalFooter>
             <Button color="default" variant="light" onPress={onMapOpenChange}>
-              Close
+              Cancel
+            </Button>
+            <Button color="primary" variant="flat" onPress={handleUpdateShipment}>
+              Update
             </Button>
           </ModalFooter>
         </ModalContent>

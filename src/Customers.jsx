@@ -835,24 +835,24 @@ function Customers() {
               </Tab>
               <Tab key="notes" title="Notes">
   <div className="p-4">
-    <div className="mb-4">
+  <div className="mb-4 flex">
       <Input 
         value={newNote}
         
         onChange={(e) => setNewNote(e.target.value)}
         placeholder="Add a new note..."
         onPressEnter={handleAddNote} // Add note on Enter key press
-        endContent={
-          <Button 
-            color="waring" 
-            variant="solid" 
+      
+      />
+        <Button 
+            color="secondary" 
+            variant="flat" 
             size="sm" 
             onClick={handleAddNote}
+            className="ml-2"
           >
-            Add
+            Add Note
           </Button>
-        }
-      />
     </div>
     <div className="overflow-y-auto max-h-[380px] pr-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
       {selectedCustomer && selectedCustomer.comment && selectedCustomer.comment.length > 0 ? (

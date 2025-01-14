@@ -2,14 +2,19 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardBody, Input } from "@nextui-org/react";
 import { useHubs } from "../HubsContext";
-
-function StepTwo({selectedVendorId,selectedCustomerId,selectedHubId,selectedProducts,setSelectedVendorId,setSelectedCustomerId,setSelectedHubId,setSelectedProducts}) {
+import OrderShip from './OrderShip';
+function StepTwo({selectedVendorId,selectedCustomerId,selectedHubId,selectedProducts,setSelectedVendorId,setSelectedCustomerId,setSelectedHubId,setSelectedProducts,selectedOrder,setSelectedOrder}) {
   const { hubs,vendors,customers,products } = useHubs();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [searchTerm2, setSearchTerm2] = useState('');
   const [searchTerm3, setSearchTerm3] = useState('');
+  const [isOrder, setIsOrder] = useState(null); // Start with null to show buttons
 
+  const handleOrderChoice = (choice) => {
+    setIsOrder(choice);
+    setSelectedProducts([])
+  };
     // Filter vendors
     const filteredVendors = vendors.filter(vendor => {
       const searchTermLower = searchTerm2.toLowerCase();
@@ -99,6 +104,34 @@ function StepTwo({selectedVendorId,selectedCustomerId,selectedHubId,selectedProd
   });
 
   return (
+    <div className='h-[300px]'>
+    {isOrder === null ? (
+      // Show buttons if no choice has been made yet
+      <div className='space-x-4 mb-4 pt-[13%]'>
+        <button 
+          onClick={() => handleOrderChoice(true)}
+          className='px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600'
+        >
+          It is an Order
+        </button>
+        <button 
+          onClick={() => handleOrderChoice(false)}
+          className='px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600'
+        >
+          Not an Order
+        </button>
+      </div>
+    ) : isOrder ? (
+
+      <OrderShip 
+      setSelectedProducts={setSelectedProducts} 
+      selectedOrder={selectedOrder} 
+      setSelectedOrder={setSelectedOrder}
+      selectedCustomerId={selectedCustomerId}
+      setSelectedCustomerId={setSelectedCustomerId}
+    />
+    ) : (
+      // If it's not an order, show the empty div
     <div className='flex min-h-[215px]  justify-between p-3'>
       <div className='flex-1 border-r-2 px-3 '>
         <h3 className='text-gray-900 font-bold mb-0 text-sm'>Shipping hub</h3>
@@ -299,6 +332,8 @@ function StepTwo({selectedVendorId,selectedCustomerId,selectedHubId,selectedProd
       </div>
       </div>
     </div>
+     )}
+     </div>
   );
 }
 

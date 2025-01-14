@@ -314,26 +314,28 @@ const handleEdit = (id) => {
             <Input
         isClearable
         radius="lg"
+        style={{color:"white"}}
         classNames={{
           label: "text-black/50 dark:text-white/90 ",
           input: [
-            "bg-gray",
-            "text-black/90 dark:text-white/90",
-            "placeholder:text-default-50/50 dark:placeholder:text-white/90",
+            "bg-gray-800",
+            "text-base", // Changed to white and larger text
+        "flex",
           ],
           innerWrapper: "bg-transparent",
           inputWrapper: [
             "shadow-md",
-            "bg-default-800/50",
-            "dark:bg-default/60",
-            "backdrop-blur-xl",
-            "backdrop-saturate-200",
-        
-            "group-data-[focus=true]:bg-default-200/50",
-            "dark:group-data-[focus=true]:bg-default/60",
-            "group-data-[hover=true]:bg-default-200/50",
-            "dark:group-data-[hover=true]:bg-default/60",
-            "!cursor-text",
+      "bg-default-800/50",
+      "dark:bg-default/60",
+      "backdrop-blur-xl",
+      "backdrop-saturate-200",
+      
+      "group-data-[focus=true]:bg-default-600/50",
+      "dark:group-data-[focus=true]:bg-default/60",
+      "group-data-[hover=true]:bg-default-600/50",
+      "dark:group-data-[hover=true]:bg-default/60",
+      "!cursor-text",
+      "max-w-[240px]",
           ],
         }}
           placeholder="Type to search..."
@@ -341,7 +343,7 @@ const handleEdit = (id) => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           startContent={
-            <SearchIcon className="text-black/50 mb-0.5 dark:text-white/90 text-slate-400 pointer-events-none flex-shrink-0" />
+            <SearchIcon className="w-5 h-5 text-white pointer-events-none flex-shrink-0" />
           }
         />
     

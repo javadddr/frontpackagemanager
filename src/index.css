@@ -79,7 +79,7 @@ body, html {
 }
 
 .ant-picker {
-  color: rgb(156, 227, 26);
+  color: rgb(0, 0, 0);
   border: 0.5px solid rgb(76, 76, 76);
 }
 
@@ -108,7 +108,7 @@ body, html {
 
 .ant-select-selector {
   /* Selector container */
-  color: rgb(255, 255, 255); /* Text color for selected option */
+  color: rgb(0, 0, 0); /* Text color for selected option */
 }
 
 .ant-select-selection-placeholder {
@@ -139,7 +139,7 @@ body, html {
 /* For multi-select tag background */
 .ant-select-selection-item {
  
-  color: rgb(156, 227, 26); /* Text color for tags */
+  color: rgb(0, 0, 0); /* Text color for tags */
 }
 
 /* For the selected option in dropdown */
