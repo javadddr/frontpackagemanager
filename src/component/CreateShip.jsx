@@ -321,7 +321,8 @@ useEffect(() => {
       await fetchBackendShipments();
       await fetchBackendShipments1();
       await fetchBackendShipments2();
-      
+      await fetchOrders();
+      await fetchCustomers();
       setFinalTrack([]);
       setTrackingNumbers([]);
       setProgress(100); // Ensure progress is at 100%

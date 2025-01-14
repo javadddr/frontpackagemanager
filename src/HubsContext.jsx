@@ -378,14 +378,14 @@ const fetchOrders = async () => {
 useEffect(() => {
   const fetchData = async () => {
     try {
-      await fetchHubs();
-      await fetchProducts();
-      await fetchVendors();
-      await fetchCustomers();
       await fetchShipments();
       await fetchBackendShipments();
       await fetchBackendShipments1(); 
       await fetchBackendShipments2();
+      await fetchHubs();
+      await fetchProducts();
+      await fetchVendors();
+      await fetchCustomers();
       await fetchOrders();
       if (Array.isArray(shipments) && Array.isArray(backendShipments)) filterShipped();
       if (Array.isArray(shipments) && Array.isArray(backendShipments1)) filterReturnedCus();
