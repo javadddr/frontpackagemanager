@@ -208,14 +208,7 @@ const determineCellColor = (day) => {
         <ConfigProvider
     theme={{
       token: {
-        // Seed Token
-        colorPrimary: 'white',
-   
-  
-
-
-        // Alias Token
-        colorBgContainer: '#18181B',
+        colorBgContainer: '#AE7EDE',
       },
     }}
   >
@@ -234,7 +227,8 @@ const determineCellColor = (day) => {
     theme={{
       token: {
         colorPrimary: 'white',
-        colorBgContainer: '#18181B',
+        colorBgContainer: '#AE7EDE',
+        color:"white"
       },
     }}
   >
@@ -242,6 +236,7 @@ const determineCellColor = (day) => {
               value={shipmentType} 
               onChange={value => setShipmentType(value)} 
               style={{ width: 170 }}
+             
             >
               <Option value="All">All</Option>
               <Option value="Shipped Packages">Shipped Packages</Option>

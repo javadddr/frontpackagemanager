@@ -174,7 +174,7 @@ useEffect(() => {
         matchingOrder ? matchingOrder.orderId?.toLowerCase() : ''
       ];
 
-      return fields.some(field => field.includes(searchTermLower));
+      return fields.some(field => field && typeof field === 'string' && field.includes(searchTermLower));
     });
   }
   

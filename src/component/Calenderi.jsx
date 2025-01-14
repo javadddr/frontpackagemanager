@@ -185,13 +185,7 @@ const determineCellColor = (day) => {
     theme={{
       token: {
         // Seed Token
-        colorPrimary: 'white',
-   
-  
-
-
-        // Alias Token
-        colorBgContainer: '#18181B',
+        colorBgContainer: '#AE7EDE',
       },
     }}
   >

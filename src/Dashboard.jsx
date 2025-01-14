@@ -283,7 +283,36 @@ if (Array.isArray(otherShipments)) {
   const chartData1 = weeklyShipments1.filter(item => item.count > 0);
   const chartData2 = unShipments.filter(item => item.count > 0);
  
- 
+  function countUnmatchedShipments(shipments, backendShipments1, backendShipments2) {
+    if (!Array.isArray(shipments)) {
+      throw new Error('shipments must be an array');
+    }
+  
+    let allTrackingNumbers = new Set();
+  
+    // Process backendShipments1 if it's an array
+    if (Array.isArray(backendShipments1)) {
+      const trackingNumbers1 = backendShipments1.flatMap(ship => 
+        ship.tracking_numbers ? ship.tracking_numbers.map(t => t.trackingNumber) : []
+      );
+      allTrackingNumbers = new Set([...allTrackingNumbers, ...trackingNumbers1]);
+    }
+  
+    // Process backendShipments2 if it's an array
+    if (Array.isArray(backendShipments2)) {
+      const trackingNumbers2 = backendShipments2.flatMap(ship => 
+        ship.tracking_numbers ? ship.tracking_numbers.map(t => t.trackingNumber) : []
+      );
+      allTrackingNumbers = new Set([...allTrackingNumbers, ...trackingNumbers2]);
+    }
+  
+    // Count shipments that are not in allTrackingNumbers
+    const unmatchedCount = shipments.filter(shipment => 
+      !allTrackingNumbers.has(shipment.tracking_number)
+    ).length;
+  
+    return unmatchedCount;
+  }
   const chartData3 = cuRetur.filter(item => item.count > 0);
   const chartData4 = venRetur.filter(item => item.count > 0);
   const chartConfig = {
@@ -435,7 +464,7 @@ if (Array.isArray(otherShipments)) {
                 </Tooltip>
               </TooltipProvider>
               </div>
-            <span className='text-4xl -mt-3 text-lime-600 '>{otherShipments.length}</span> 
+            <span className='text-4xl -mt-3 text-lime-600 '>{countUnmatchedShipments(shipments, backendShipments1, backendShipments2)}</span> 
           </div>
             </CardTitle>
           </CardHeader>
