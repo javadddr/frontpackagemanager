@@ -26,7 +26,7 @@ function Ship() {
   const handleCloseModal = () => setModalOpen(false);
   const [couriers, setCouriers] = useState([]);
   const [filteredCarriers, setFilteredCarriers] = useState([]); // Filtered for the dropdown
-  const { fetchShipments,shipments,backendShipments,setShipments,otherShipments,fetchBackendShipments,fetchBackendShipments1,fetchBackendShipments2,shipped,fetchProducts } = useHubs();
+  const { fetchShipments,shipments,backendShipments,setShipments,fetchOrders,fetchCustomers,otherShipments,fetchBackendShipments,fetchBackendShipments1,fetchBackendShipments2,shipped,fetchProducts } = useHubs();
   useEffect(() => {
     const fetchCouriers = async () => {
       try {
@@ -140,7 +140,7 @@ function Ship() {
 
         
               {/* Render the CreateShip component here */}
-              <CreateShip handleCloseModal={handleCloseModal} fetchProducts={fetchProducts} otherShipments={otherShipments} setProgress={setProgress} setMessages={setMessages} setOpen={setOpen} fetchBackendShipments2={fetchBackendShipments2} fetchBackendShipments1={fetchBackendShipments1} fetchBackendShipments={fetchBackendShipments} fetchShipments={fetchShipments} setShipments={setShipments} trackingNumbers={trackingNumbers} setTrackingNumbers={setTrackingNumbers} couriers={couriers} filteredCarriers={filteredCarriers} setFilteredCarriers={setFilteredCarriers}/>
+              <CreateShip handleCloseModal={handleCloseModal} fetchCustomers={fetchCustomers} fetchOrders={fetchOrders} fetchProducts={fetchProducts} otherShipments={otherShipments} setProgress={setProgress} setMessages={setMessages} setOpen={setOpen} fetchBackendShipments2={fetchBackendShipments2} fetchBackendShipments1={fetchBackendShipments1} fetchBackendShipments={fetchBackendShipments} fetchShipments={fetchShipments} setShipments={setShipments} trackingNumbers={trackingNumbers} setTrackingNumbers={setTrackingNumbers} couriers={couriers} filteredCarriers={filteredCarriers} setFilteredCarriers={setFilteredCarriers}/>
             </motion.div>
           </motion.div>
         )}

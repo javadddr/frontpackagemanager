@@ -5,8 +5,7 @@ import StepOne from './StepOne';
 import StepTwo from './StepTwo';
 
 
-import StepThree from './StepThree';
-const CreateShip = ({ handleCloseModal,fetchShipments,setProgress,setMessages, setOpen,fetchBackendShipments,fetchBackendShipments1,fetchBackendShipments2,setShipments, setTrackingNumbers, trackingNumbers, couriers, filteredCarriers, setFilteredCarriers }) => {
+const CreateShip = ({ handleCloseModal,fetchCustomers,fetchOrders,fetchShipments,setProgress,setMessages, setOpen,fetchBackendShipments,fetchBackendShipments1,fetchBackendShipments2,setShipments, setTrackingNumbers, trackingNumbers, couriers, filteredCarriers, setFilteredCarriers }) => {
   const [selectedCarrier, setSelectedCarrier] = useState(null); // Manage selected carrier
   const [finalTrack, setFinalTrack] = useState([]);
   const [sheetstrackingNumbers, setSheetsTrackingNumbers] = useState([]);
