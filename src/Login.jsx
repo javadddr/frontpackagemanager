@@ -377,7 +377,7 @@ const Login = () => {
               
               <Tab key="Login" title="Login"  className={`${selected=='Login'?'focus:outline-none':''}`} style={{ outline: 'none' }}>
                 <form className="flex flex-col gap-4 h-[300px] focus:border-none ">
-                <p className=" text-xs">Username</p>
+             
               
                   <p className=" text-xs">Email</p>
                   <Input   
