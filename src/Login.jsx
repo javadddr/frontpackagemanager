@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-
 import {Tabs, Tab, Input, Button, Card, CardBody, CardHeader} from "@nextui-org/react";
 import {EyeFilledIcon} from "./EyeFilledIcon";
 import {EyeSlashFilledIcon} from "./EyeSlashFilledIcon";
@@ -8,6 +7,9 @@ import Typed from 'typed.js';
 import Footerlogin from "./FooterLogin"
 import {Alert} from "@nextui-org/react";
 import { motion } from "framer-motion";
+import {jwtDecode} from "jwt-decode"
+import { GoogleLogin } from '@react-oauth/google';
+
 ////
 import "./Register.css";
 
@@ -16,6 +18,7 @@ import Modal from './Modal'; // Import the modal component
 
 const Login = () => {
   const [email, setEmail] = useState("");
+  
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -44,7 +47,7 @@ const Login = () => {
       });
   
       const data = await response.json();
-
+   
   
       if (response.status === 200) {
         // Save token and key to local storage
@@ -94,6 +97,135 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+
+  const handleLoginGoogle = async (credentialResponse) => {
+    setIsLoading(true);
+    try {
+      const jwtResponse = jwtDecode(credentialResponse.credential);
+      const { email } = jwtResponse; // Extract email from the JWT payload
+      const password = "google_register"; // Using google_register as password for consistency
+  
+      // Try to login first (this will fail if the user does not exist)
+      const loginResponse = await fetch("https://api.globalpackagetracker.com/user/authByCredentials", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+  
+      const loginData = await loginResponse.json();
+  
+      if (loginResponse.status === 200) {
+        // User exists, proceed with login
+        localStorage.setItem("token", loginData.jwt);
+        localStorage.setItem("key", loginData.key);
+  
+        // Second POST request to /user/authByKey
+        const secondResponse = await fetch("https://api.globalpackagetracker.com/user/authByKey", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ key: loginData.key }),
+        });
+  
+        const secondData = await secondResponse.json();
+  
+        if (secondResponse.status === 200) {
+          localStorage.setItem("user", JSON.stringify({
+            name: secondData.name,
+            email: secondData.email,
+            capacity: secondData.capacity,
+          }));
+          setSuccessMessage("Login successful!");
+          setIsSuccess(true);
+          setTimeout(() => {
+            setIsSuccess(false);
+            setSuccessMessage("");
+            navigate("/");
+          }, 2000);
+        } else {
+          setErrorMessage("Authentication failed with the key.");
+        }
+      } else {
+        // If login fails, attempt to register the user
+        setSuccessMessage("You are a new user. We need to register your account: Registering...");
+        setIsSuccess(true);
+        
+        const registerResponse = await fetch("https://api.globalpackagetracker.com/user/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            source: "Package Manager",
+          }),
+        });
+  
+        const registerData = await registerResponse.json();
+  
+        if (registerResponse.status === 201) {
+          setSuccessMessage("Registration successful! Creating the account...");
+          
+          // After registration, try to login again
+          const loginAfterRegisterResponse = await fetch("https://api.globalpackagetracker.com/user/authByCredentials", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          });
+  
+          const loginAfterRegisterData = await loginAfterRegisterResponse.json();
+  
+          if (loginAfterRegisterResponse.status === 200) {
+            localStorage.setItem("token", loginAfterRegisterData.jwt);
+            localStorage.setItem("key", loginAfterRegisterData.key);
+  
+            // Second POST request to /user/authByKey after registration
+            const authByKeyResponse = await fetch("https://api.globalpackagetracker.com/user/authByKey", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ key: loginAfterRegisterData.key }),
+            });
+  
+            const authByKeyData = await authByKeyResponse.json();
+  
+            if (authByKeyResponse.status === 200) {
+              setSuccessMessage("Login successful!");
+              localStorage.setItem("user", JSON.stringify({
+                name: authByKeyData.name,
+                email: authByKeyData.email,
+                capacity: authByKeyData.capacity,
+              }));
+  
+              // Redirect to the main page
+              setTimeout(() => {
+                navigate("/");
+              }, 2000);
+            } else {
+              setErrorMessage("Authentication failed with the key after registration.");
+            }
+          } else {
+            setErrorMessage("Login failed after registration. Please try again.");
+          }
+        } else {
+          setErrorMessage(registerData.message || "Registration failed.");
+        }
+      }
+    } catch (error) {
+      setErrorMessage("An error occurred. Please try again later.");
+      console.error("An error occurred:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   useEffect(() => {
     setIsLoaded(true);
@@ -309,13 +441,22 @@ const Login = () => {
             </Tabs>
           </CardBody>
         </Card>
-      
+        <div className='flex flex-col justify-center items-center mt-2'>
+       <Button size='md' radius="sm" color='warning' variant='flat' className='mb-2'>Or login using Google.</Button> 
+       <GoogleLogin
+  onSuccess={handleLoginGoogle}
+  onError={() => {
+    console.log('Login Failed');
+  }}
+/>;
+</div>
           </div>
 
         
           <div className="greenSquare"></div>
           <div className="greenSquare2"></div>
         </div>
+ 
         <div  style={{marginTop:'47px'}}>
         <Footerlogin/>
         </div>
