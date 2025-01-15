@@ -484,17 +484,17 @@ const Register = () => {
           </Tabs>
         </CardBody>
       </Card>
-      <div className='flex flex-col justify-center items-center mt-2'>
+      {/* <div className='flex flex-col justify-center items-center mt-2'>
        <Button size='md' radius="sm" color='warning' variant='flat' className='mb-2'>Or, you can sign up using Google.</Button> 
       <GoogleLogin
-  onSuccess={handleRegisterGoogle}
-  onError={() => {
-    console.log('Login Failed');
-  }}
-  auto_select={true}
-  theme="filled_blue"
-/>;
-</div>
+          onSuccess={handleRegisterGoogle}
+          onError={() => {
+            console.log('Login Failed');
+          }}
+          auto_select={true}
+          theme="filled_blue"
+        />;
+        </div> */}
         </div>
 
       

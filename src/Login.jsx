@@ -441,17 +441,17 @@ const Login = () => {
             </Tabs>
           </CardBody>
         </Card>
-        <div className='flex flex-col justify-center items-center mt-2'>
+        {/* <div className='flex flex-col justify-center items-center mt-2'>
        <Button size='md' radius="sm" color='warning' variant='flat' className='mb-2'>Or login using Google.</Button> 
        <GoogleLogin
-  onSuccess={handleLoginGoogle}
-  onError={() => {
-    console.log('Login Failed');
-  }}
-  theme="filled_blue"
- 
-/>;
-</div>
+          onSuccess={handleLoginGoogle}
+          onError={() => {
+            console.log('Login Failed');
+          }}
+          theme="filled_blue"
+        
+        />;
+        </div> */}
           </div>
 
         
