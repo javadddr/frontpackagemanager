@@ -17,6 +17,7 @@ function OrderDown() {
   const [draggedOrder, setDraggedOrder] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [needsUpdate, setNeedsUpdate] = useState(false);
   useEffect(() => {
     const processOrders = async () => {
       const newStatusPipelines = statusOrder.reduce((acc, status) => {
@@ -42,12 +43,16 @@ function OrderDown() {
         }
         // After potentially updating the order, place it in its correct pipeline
         newStatusPipelines[order.status].push(order);
+       
       }
       setStatusPipelines(newStatusPipelines);
+      setNeedsUpdate(false);
     };
   
-    processOrders();
-  }, [orders, shipments]);
+    if (needsUpdate) {
+      processOrders();
+    }
+  }, [orders,needsUpdate, shipments]);
   
   // Helper function to update order status
   const updateOrderStatus = async (orderId, newStatus) => {
@@ -57,12 +62,16 @@ function OrderDown() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'x-owner': localStorage.getItem("key") // Assuming this is how you pass owner info
+          'x-owner': localStorage.getItem("key")
         },
         body: JSON.stringify({ status: newStatus })
       });
       if (!response.ok) throw new Error('Failed to update order status');
-      await updateOrders(); // Refresh orders after status update
+      // Update local state instead of fetching all orders
+      setOrders(prevOrders => prevOrders.map(order => 
+        order._id === orderId ? { ...order, status: newStatus } : order
+      ));
+      setNeedsUpdate(true);
     } catch (error) {
       console.error("Error updating order status:", error);
     }
@@ -77,10 +86,6 @@ function OrderDown() {
     setStatusPipelines(newStatusPipelines);
   }, [orders]);
 
-  // Function to fetch new orders and update state
-  const updateOrders = async () => {
-    await fetchOrders(); // Assuming this function updates orders in the context
-  };
   // Function to get customer name from customer ID
   const getCustomerName = (customerId) => {
     const customer = customers.find(cust => cust._id === customerId);
@@ -122,7 +127,7 @@ function OrderDown() {
         },
         body: JSON.stringify({ status: newStatus })
       })
-      .then(() => updateOrders()) // Fetch updated orders after status change
+
       .catch(error => console.error("Error updating order status:", error));
     }
     setDraggedOrder(null);

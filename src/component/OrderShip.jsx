@@ -3,17 +3,33 @@ import { useHubs } from "../HubsContext";
 import { Select } from 'antd';
 import { motion } from 'framer-motion';
 import { Card, CardBody } from '@nextui-org/react';
-
+import {  InputNumber } from 'antd'; 
 const { Option } = Select;
 
-function OrderShip({ setSelectedProducts, selectedOrder, setSelectedOrder, selectedCustomerId, setSelectedCustomerId }) {
+function OrderShip({ setSelectedProducts, selectedOrder,setUpdatedItems, setSelectedOrder, selectedCustomerId, setSelectedCustomerId }) {
   const { orders, products, customers } = useHubs();
 
   // Filter out orders with tracking_numbers field
-  const filteredOrders = orders.filter(order => order.tracking_numbers == null || order.tracking_numbers.length === 0);
+  const filteredOrders = orders.filter(order => {
+    return !order.items.every(item => item.quantity === item.shipped);
+  });
 console.log("orders",orders)
-  const formatOption = (order) => `${order.orderId} - ${order.internalPO || 'N/A'}`;
+  const formatOption = (order) => `${order.orderId} - ${order.internalPO || 'No PO'}`;
 
+  const handleQuantityChange = (value, item) => {
+
+ 
+  
+    // Update the state with new quantity for this specific item
+    setUpdatedItems(prevItems => {
+      const updatedItem = {
+        ...item,
+        shipped: value  // Assuming 'value' is the new quantity
+      };
+      const newItems = prevItems.filter(i => i._id !== item._id);
+      return [...newItems, updatedItem];
+    });
+  };
   const handleSelectChange = (value) => {
     const foundOrder = filteredOrders.find(order => formatOption(order) === value);
     setSelectedOrder(foundOrder);
@@ -49,11 +65,20 @@ console.log("orders",orders)
     const d = new Date(date);
     return `${d.getDate()} ${d.toLocaleString('default', { month: 'short' })}`;
   };
+  const onChange = (value) => {
+    console.log('changed', value);
+    console.log('item._id', item._id);
+    console.log('changed', item.quantity);
+    
+    
+  };
+
+
 
   return (
-    <div className="flex flex-col md:flex-row justify-center items-start p-4 space-y-4 md:space-y-0 md:space-x-4">
-      <div className="w-full md:w-1/3">
-        <div className='text-gray-900 pb-6 pt-16'>
+    <div className="flex flex-col md:flex-row justify-center items-start p-4 ">
+      <div className="w-full md:w-1/3 mr-32 mt-6">
+        <div className='text-gray-900 pb-6 '>
           Select your order (You need to first create an order. If you don’t have an order, click "Previous," then "Next," and choose "Not an order").
         </div>
         <Select
@@ -72,40 +97,40 @@ console.log("orders",orders)
             </Option>
           ))}
         </Select>
+       
+         {selectedOrder && 
+         <div className='flex flex-col'>
+         <div>Customer: {getCustomerName(selectedOrder.customer)}  </div>
+         <div>Internal PO: {selectedOrder.internalPO || 'No PO'}  </div>
+         <div>Order Date: {formatDate(selectedOrder.orderDate)}  </div>
+         <div>Payment Status: {selectedOrder.paymentStatus}  </div>
+         
+         </div>
+         }
+          
+        
       </div>
-      {selectedOrder && (
-        <motion.div 
-          className="w-full md:w-2/3"
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Card className="shadow-lg  h-[280px]">
-            <CardBody>
-              <h2 className="text-base font-semibold mb-0 text-gray-900 dark:text-gray-100">{selectedOrder.orderId}</h2>
-              <p className="text-gray-600 m-0 p-0"><strong>Customer:</strong> {getCustomerName(selectedOrder.customer)}</p>
-              {/* ... other order details ... */}
-              <p className="text-gray-600 m-0 p-0"><strong>Internal PO:</strong> {selectedOrder.internalPO || 'N/A'}</p>
-              <p className="text-gray-600 m-0 p-0"><strong>Customer PO:</strong> {selectedOrder.customerPO || 'N/A'}</p>
-              <p className="text-gray-600 m-0 p-0"><strong>Order Date:</strong> {formatDate(selectedOrder.orderDate)}</p>
-              <p className="text-gray-600 m-0 p-0"><strong>Fulfillment Time:</strong> {formatDate(selectedOrder.fulfillmentTime)}</p>
-              <p className="text-gray-600 m-0 p-0"><strong>Status:</strong> {selectedOrder.status}</p>
-              <p className="text-gray-600 m-0 p-0"><strong>Payment Status:</strong> {selectedOrder.paymentStatus}</p>
-              <div className="mb-2">
+  
+        { selectedOrder && <div className="mb-2 md:w-1/3">
                 <strong className="text-gray-600 ">Items:</strong>
                 <ul className="list-disc pl-4">
                   {selectedOrder.items.map((item, index) => (
-                    <li key={index} className="text-gray-600">
-                      {getProductName(item.item)} - Quantity: {item.quantity}
-                    </li>
+                    <div key={index} className="text-gray-600">
+                     <spnan className="font-semibold text-yellow-600"> {getProductName(item.item)}</spnan> - Quantity: {item.quantity}<br></br>
+                      Already Shipped: {item.shipped}
+                      <br></br>
+                      How many do you want to send now?
+                      <InputNumber 
+                        min={0} 
+                        max={item.quantity-item.shipped} 
+                        defaultValue={item.quantity-item.shipped} 
+                        onChange={(value) => handleQuantityChange(value, item)}
+                      />
+                      <br></br>-------------------------
+                    </div>
                   ))}
                 </ul>
-              </div>
-              {/* Add more fields as needed */}
-            </CardBody>
-          </Card>
-        </motion.div>
-      )}
+              </div>}
     </div>
   );
 }

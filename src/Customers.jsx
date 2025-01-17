@@ -36,7 +36,7 @@ import MapGE from "./MapGE";
 import MapWO from "./MapWO";
 const MotionButton = motion(Button);
 function Customers() {
-  const { customers,backendShipments,backendShipments1,products,hubs, fetchCustomers,setCustomers,shipments } = useHubs();
+  const { customers,backendShipments,orders,backendShipments1,products,hubs, fetchCustomers,setCustomers,shipments } = useHubs();
 
 
   const [isModalOpen, setModalOpen] = useState(false);
@@ -176,7 +176,10 @@ function Customers() {
       return total;
     }, 0);
   };
-
+  const findNumberOfOrders = (customerId) => {
+    // Assuming 'orders' is an array of order objects and accessible in this scope
+    return orders.filter(order => order.customer.toString() === customerId.toString()).length;
+  };
   const findMatchingShipments = (customerId) => {
     // Step 1: Collect tracking numbers and related info from backendShipments
     const shipmentsInfo = backendShipments.reduce((acc, shipment) => {
@@ -391,6 +394,15 @@ function Customers() {
   const itemsPerPage = 5; // Number of items to show per page
   const matchingShipmentsForCustomer = findMatchingShipments(selectedCustomer?._id);
   const totalPages = Math.ceil((matchingShipmentsForCustomer?.length || 0) / itemsPerPage);
+
+  const [currentPage2, setCurrentPage2] = useState(1);
+  const itemsPerPage2 = 5; // Number of items to show per page
+  const matchingShipmentsForCustomer2 = selectedCustomer ? findNumberOfOrders(selectedCustomer._id) : 0;
+  
+  // Use matchingShipmentsForCustomer2 for total count, not matchingShipmentsForCustomer
+  const totalPages2 = Math.ceil((matchingShipmentsForCustomer2 || 0) / itemsPerPage2);
+console.log("matchingShipmentsForCustomer2",matchingShipmentsForCustomer2)
+
 
   const paginatedShipments = React.useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -784,7 +796,7 @@ function Customers() {
 <div className="mt-6">
 {matchingShipmentsForCustomer && matchingShipmentsForCustomer.length > 0 ? (
    <>
-                              <Table 
+                              {/* <Table 
                                 aria-label="Shipments for Customer"
                                 classNames={{
                                   wrapper: "min-h-[200px]", // Adjust height as needed
@@ -814,12 +826,73 @@ function Customers() {
                                     </TableRow>
                                   )}
                                 </TableBody>
-                              </Table>
+                              </Table> */}
+                              {selectedCustomer && (
+    <Table 
+      aria-label="Orders for Customer"
+      classNames={{
+        wrapper: "min-h-[200px] mt-4", // Adjust height and add margin-top for spacing
+      }}
+    >
+      <TableHeader>
+        <TableColumn key="orderId">Order ID</TableColumn>
+        <TableColumn key="orderDate">Order Date</TableColumn>
+        <TableColumn key="fulfillmentTime">Fulfillment Time</TableColumn>
+       
+        <TableColumn key="paymentStatus">Payment Status</TableColumn>
+        <TableColumn key="trackingNumbers">Tracking Numbers</TableColumn>
+        <TableColumn key="items">Items</TableColumn>
+        <TableColumn key="deliveryStatus">Delivery Status</TableColumn>
+      </TableHeader>
+      <TableBody items={orders.filter(order => order.customer.toString() === selectedCustomer._id)}>
+        {(order) => (
+          <TableRow key={order.orderId}>
+            <TableCell>{order.orderId}</TableCell>
+            <TableCell>
+  {new Date(order.orderDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
+</TableCell>
+<TableCell>
+  {order.fulfillmentTime 
+    ? new Date(order.fulfillmentTime).toLocaleDateString('en-US', { day: 'numeric', month: 'short' }) 
+    : 'Not Set'}
+</TableCell>
+        
+            <TableCell>{order.paymentStatus}</TableCell>
+            <TableCell>
+              {order.tracking_numbers && order.tracking_numbers.length > 0 ? 
+                order.tracking_numbers.map((track, index) => (
+                  <div key={index}>{track.trackingNumber}</div>
+                )) : 
+                "No Tracking Numbers"
+              }
+            </TableCell>
+            <TableCell>
+              {order.items.map((item, index) => (
+                <div key={index}>
+                  {products.find(product => product._id === item.item)?.name || 'Unknown Product'} 
+                 :  {item.quantity}, Shipped: {item.shipped}
+                </div>
+              ))}
+            </TableCell>
+            <TableCell>
+             
+              {order.tracking_numbers && order.tracking_numbers.length > 0 
+                ? order.tracking_numbers.map((track, index) => {
+                    const shipment = shipments.find(s => s.tracking_number === track.trackingNumber);
+                    return <div key={index}>{shipment ? shipment.delivery_status : 'Unknown'}</div>;
+                  })
+                : 'No Delivery Status'}
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  )}
                                 <div className="flex justify-center mt-4">
                                 <Pagination
-                                  total={totalPages}
-                                  page={currentPage}
-                                  onChange={(page) => setCurrentPage(page)}
+                                  total={totalPages2}
+                                  page={currentPage2}
+                                  onChange={(page) => setCurrentPage2(page)} // Update to setCurrentPage2
                                   showControls
                                   showShadow
                                   color="warning"

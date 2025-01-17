@@ -24,14 +24,14 @@ const MotionButton = motion(Button);
 
 function Orders() {
 
-
+  const [form] = Form.useForm();
   const { customers,products,orders,setOrders, fetchOrders} = useHubs();
 console.log("Orders",orders)
 
   const [isModalOpen, setModalOpen] = useState(false);
 const [loading, setLoading] = useState(false);
 const [success, setSuccess] = useState(false);
-const [form] = Form.useForm();
+
 const [formValues, setFormValues] = useState({
   orderId: '',
   internalPO: '',
@@ -40,7 +40,7 @@ const [formValues, setFormValues] = useState({
   fulfillmentTime: '',
   status: '',
   paymentStatus: '',
-  itemsList: '',
+  items: [], // Changed from itemsList to an array of objects
   quantity: 0,
   paymentMethod: '',
   invoiceNumber: '',
@@ -80,35 +80,38 @@ const handleFormSubmit = async (values) => {
     values.orderDate = values.orderDate ? values.orderDate.format("DD.MM.YYYY") : null;
     values.fulfillmentTime = values.fulfillmentTime ? values.fulfillmentTime.format("DD.MM.YYYY") : null;
 
-    // Convert itemsList and quantity to the new structure
-    const items = values.itemsList.map((itemId, index) => {
-      const quantities = values.quantity.split('-');
-      return {
-        item: itemId,
-        quantity: parseInt(quantities[index], 10)
-      };
-    });
+    // Parse the quantity string
+    const quantities = values.quantity.split('-').map(Number);
+    
+    // Ensure the number of quantities matches the number of items selected
+    if (quantities.length !== values.items.length) {
+      form.setFields([
+        {
+          name: 'quantity',
+          errors: ['The number of quantities must match the number of items selected.']
+        }
+      ]);
+      return;
+    }
+
+    // Format items for backend submission with correct quantities
+    const itemsForBackend = values.items.map((item, index) => ({
+      item: item.itemId,
+      quantity: quantities[index] || 1, // Use 1 as default if quantity can't be parsed
+      shipped: item.shipped || 0
+    }));
 
     // Get owner from localStorage
     const owner = localStorage.getItem("key");
-
-    // Prepare the body for the API call
-    const body = {
-      ...values,
-      items: items,
-      owner: owner
-    };
-
-    console.log(body);
 
     // Make API call to create order
     const response = await fetch(`${backendUrl}/api/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-owner': owner // Assuming 'x-owner' is the header name for the owner
+        'x-owner': owner 
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify({ ...values, items: itemsForBackend, owner })
     });
 
     const data = await response.json();
@@ -129,6 +132,7 @@ const handleFormSubmit = async (values) => {
     setLoading(false);
   }
 };
+
 
 
   return (
@@ -187,7 +191,7 @@ const handleFormSubmit = async (values) => {
                }}
                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
              >
-               {/* Close "X" Button */}
+            
                <CloseOutlined
                  style={{
                    position: "absolute",
@@ -345,38 +349,48 @@ const handleFormSubmit = async (values) => {
 
   <Form.Item
   label="Items"
-  name="itemsList"
+  name="items"
   rules={[{ required: true, message: 'Please select at least one item!' }]}
   style={{ marginBottom: 8 }}
 >
   {products ? (
-    <Select
-      mode="multiple"
-      showSearch
-      className="text-black"
-      style={{ 
-        width: '70%', 
-        marginLeft:"121px",
-        color: "black !important"  // Using !important to override any conflicting style
-      }}
-      placeholder="Select Items"
-      optionFilterProp="children"
-      filterOption={(input, option) => 
-        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-      }
-      value={form.getFieldValue('itemsList') || []}
-      onChange={(value) => form.setFieldsValue({ itemsList: value })}
-    >
-      {products.filter(product => !form.getFieldValue('itemsList')?.includes(product._id)).map((product) => (
-        <Option key={product._id} value={product._id}>
-          {`${product.name}-Left ${product.currentInventory}`}
-        </Option>
-      ))}
-    </Select>
+    <ConfigProvider theme={{ token: { colorPrimary: 'white' } }}>
+      <Select
+        mode="multiple"
+        showSearch
+        style={{ width: '70%', marginLeft: "121px" }}
+        placeholder="Select Items"
+        optionFilterProp="children"
+        filterOption={(input, option) => 
+          option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+        }
+        onChange={(_, selectedOptions) => {
+          form.setFieldsValue({
+            items: selectedOptions.map(option => ({
+              itemId: option.value, // Use the value as item ID
+              quantity: 1, // Default quantity to 1
+              shipped: 0 // Default shipped to 0
+            }))
+          });
+        }}
+      >
+        {products.map((product) => (
+          <Option key={product._id} value={product._id}>
+            {`${product.name}-Left ${product.currentInventory}`}
+          </Option>
+        ))}
+      </Select>
+    </ConfigProvider>
   ) : (
-    <Spin /> // or any other loading indicator
+    <Spin />
   )}
 </Form.Item>
+
+
+
+
+
+
   <Form.Item
     label="Quantity"
     name="quantity"
@@ -386,24 +400,31 @@ const handleFormSubmit = async (values) => {
     <Input style={{ width: '74%',marginLeft:"102px" }} placeholder="Enter Quantity-separate them with -" min={0} />
   </Form.Item>
   <Form.Item
-    label="Customer"
-    name="customer"
-    rules={[{ required: true }]}
-    style={{ marginBottom: 8 }}
-  >
-      {products ? (
-  <Select style={{ width: '75.3%',marginLeft:"94px" }} placeholder="Select Customer">
-    {customers.map((product) => (
-      <Option key={product._id} value={product._id}>
-        {`${product.name}`}
-      </Option>
-    ))}
-  </Select>
-) : (
-  <Spin /> // or any other loading indicator
-)}
-  </Form.Item>
-
+  label="Customer"
+  name="customer"
+  rules={[{ required: true }]}
+  style={{ marginBottom: 8 }}
+>
+  {customers ? (
+    <Select
+      showSearch
+      style={{ width: '75.3%', marginLeft: "94px" }}
+      placeholder="Search Customer"
+      optionFilterProp="children"
+      filterOption={(input, option) =>
+        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+      }
+    >
+      {customers.map((customer) => (
+        <Option key={customer._id} value={customer._id}>
+          {`${customer.name}`}
+        </Option>
+      ))}
+    </Select>
+  ) : (
+    <Spin /> // or any other loading indicator
+  )}
+</Form.Item>
 
 
   <Form.Item
@@ -462,14 +483,14 @@ const handleFormSubmit = async (values) => {
   </Form.Item>
 
   <Form.Item style={{ marginTop: 8 }}>
-    <Button
+    <AntButton
       type="primary"
       htmlType="submit"
       style={{ width: "100%" }}
       loading={loading}
     >
       {loading ? "Submitting..." : "Add New Order"}
-    </Button>
+    </AntButton>
   </Form.Item>
 </Form>
         )}

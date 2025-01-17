@@ -11,7 +11,9 @@ import {
   Tab,
   useDisclosure,
 } from "@nextui-org/react";
+import OrderItems from "./OrderItems";
 import { TbGrid3X3 } from "react-icons/tb";
+import { EditIcon } from "./EditIcon";
 import { Card, CardBody } from "@nextui-org/react";
 import { FaBox } from "react-icons/fa"; // Example icon, adjust as needed
 import { RiUserReceived2Line } from "react-icons/ri";
@@ -19,6 +21,8 @@ import { FaSitemap } from "react-icons/fa";
 import { FaHourglassEnd } from "react-icons/fa6";
 import { FaFileInvoiceDollar } from "react-icons/fa6";
 import { VscReferences } from "react-icons/vsc";
+import { Check } from "lucide-react"
+import { AutoComplete } from 'antd';
 import { Form, Input, Button as AntButton } from "antd";
 function OrderModal({ order, isOpen, onOpenChange,setSelectedOrder,fetchOrders }) {
   const {isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure(); // For delete confirmation
@@ -26,6 +30,8 @@ function OrderModal({ order, isOpen, onOpenChange,setSelectedOrder,fetchOrders }
   const { products,customers } = useHubs();
   const [newNote, setNewNote] = useState(""); 
   const [isDeleting, setIsDeleting] = useState(false);
+  const [editingField, setEditingField] = useState(null); // Tracks which field is currently being edited
+  const [customerInput, setCustomerInput] = useState('');
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const handleAddNote = async () => {
     if (!newNote.trim()) return; // Prevent adding empty notes
@@ -51,7 +57,7 @@ function OrderModal({ order, isOpen, onOpenChange,setSelectedOrder,fetchOrders }
     }));
 
     // Optionally re-fetch orders to ensure global state sync if other parts of your app rely on it
-    fetchOrders();
+    await fetchOrders()
     
       setNewNote(""); // Clear the input after adding the note
     } catch (error) {
@@ -85,23 +91,132 @@ function OrderModal({ order, isOpen, onOpenChange,setSelectedOrder,fetchOrders }
       onDeleteClose();
     }
   };
+  const options = [
+    {
+      value: 'Credit Card',
+    },
+    {
+      value: 'Bank Transfer',
+    },
+    {
+      value: 'Cash on Delivery',
+    },
+  ];
+  const options3 = [
+    {
+      value: 'Paid',
+    },
+    {
+      value: 'Unpaid',
+    },
+    {
+      value: 'Partially Paid',
+    },
+  ];
+  const options2 = customers.map(customer => ({
+    value: customer._id,
+    label: customer.name // Assuming 'name' is the customer name property
+  }));
+  
+  const [formData, setFormData] = useState({
+    orderId: order.orderId,
+    internalPO: order.internalPO || '',
+    customerPO: order.customerPO || '',
+    orderDate: new Date(order.orderDate).toISOString().split('T')[0],
+    fulfillmentTime: order.fulfillmentTime ? new Date(order.fulfillmentTime).toISOString().split('T')[0] : '',
+    paymentStatus: order.paymentStatus,
+    paymentMethod: order.paymentMethod || '',
+    invoiceNumber: order.invoiceNumber || '',
+    customer: order.customer || '',
+    discounts: order.discounts,
+    orderPriority: order.orderPriority,
+    items: order.items || [],
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
 
+ 
+  const handleUpdateOrder = async () => {
+    try {
+      // Convert dates to string format for sending to server
+      const updatedFormData = { ...formData };
+      updatedFormData.orderDate = updatedFormData.orderDate ? new Date(updatedFormData.orderDate).toISOString() : null;
+      updatedFormData.fulfillmentTime = updatedFormData.fulfillmentTime ? new Date(updatedFormData.fulfillmentTime).toISOString() : null;
+  
+      // Prepare the request body
+      const body = {
+        orderId: updatedFormData.orderId, // Note: You might not want to allow updating orderId, check backend logic
+        internalPO: updatedFormData.internalPO,
+        customerPO: updatedFormData.customerPO,
+        orderDate: updatedFormData.orderDate,
+        fulfillmentTime: updatedFormData.fulfillmentTime,
+        // status: updatedFormData.status, // Status isn't in your formData, so commenting out
+        paymentStatus: updatedFormData.paymentStatus,
+        items: updatedFormData.items, // Ensure items are in the correct format
+        customer: updatedFormData.customer,
+        paymentMethod: updatedFormData.paymentMethod,
+        invoiceNumber: updatedFormData.invoiceNumber,
+        discounts: updatedFormData.discounts,
+        orderPriority: updatedFormData.orderPriority,
+        // notes: updatedFormData.notes, // Notes isn't in your formData, so commenting out
+      };
+  
+      const response = await fetch(`${backendUrl}/api/orders/${order._id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update order");
+      }
+  
+      const updatedOrder = await response.json();
+      setSelectedOrder(updatedOrder.order); 
+      await fetchOrders(); // Refresh the list of orders
+    } catch (error) {
+      console.error("Error updating order:", error);
+      // Optionally, show an error message to the user
+    }
+  };
 
   const getCustomerName = (customerId) => {
     const customer = customers.find(cust => cust._id === customerId);
-    return customer ? customer.name : 'Customer not loaded';
+    return customer ? customer.name : '';
   };
   const getCustomerName2 = (customerId) => {
     const customer = products.find(cust => cust._id === customerId);
     return customer ? customer.name : 'Customer not loaded';
   };
 
+  const handlePaymentMethodChange = (value) => {
+    setFormData(prev => ({
+      ...prev,
+      paymentMethod: value
+    }));
+  };
+  const handlePaymentStatusChange = (value) => {
+    setFormData(prev => ({
+      ...prev,
+      paymentStatus: value
+    }));
+  };
+
 
 
   return (
     <div>
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange}   className="dark " size="4xl">
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false}  className="dark " size="4xl">
       <ModalContent>
         {(onClose) => (
           <>
@@ -109,67 +224,235 @@ function OrderModal({ order, isOpen, onOpenChange,setSelectedOrder,fetchOrders }
             <ModalBody style={{ minHeight: '520px' }}>
   <Tabs aria-label="Order Tabs" className="flex justify-center">
     <Tab key="general" title="General">
-      <div>
-      <div className="flex items-center w-full text-gray-300 font-mono text-sm mb-2">
-        <TbGrid3X3 className="mr-1 text-blue-500" size={16} />
-        <span className="text-gray-100 font-semibold">Order ID:</span>
-        <span className="text-yellow-500 ml-1">{order.orderId}</span>
+    <div>
+  <div className="flex items-center w-full text-gray-300  text-sm mb-2">
+    <VscReferences className="mr-1 text-blue-500" size={16} />
+    <span className="text-gray-400 font-semibold h-[35px] pt-2 items-center w-[80px]">Internal PO:</span>
+    {editingField === "internalPO" ? (
+      <div className="flex items-center">
+        <Input
+          name="internalPO"
+          value={formData.internalPO}
+          onChange={handleChange}
+          autoFocus
+        />
+        <Check
+          className="ml-2 cursor-pointer text-green-500"
+          onClick={() => {
+            handleUpdateOrder();
+            setEditingField(null);
+          }}
+        />
       </div>
-      <div className="flex items-center w-full text-gray-300 font-mono text-sm mb-2">
-        <VscReferences className="mr-1 text-blue-500" size={16} />
-        <span className="text-gray-100 font-semibold">Internal PO:</span>
-        <span className="text-yellow-500 ml-1">{order.internalPO}</span>
-      </div>
-      <div className="flex items-center w-full text-gray-300 font-mono text-sm mb-2">
-        <FaFileInvoiceDollar className="mr-1 text-blue-500" size={16} />
-        <span className="text-gray-100 font-semibold">Invoice Number:</span>
-        <span className="text-yellow-500 ml-1">{order.invoiceNumber}</span>
-      </div>
-      <div className="flex items-center w-full text-gray-300 font-mono text-sm mb-2">
-        <RiUserReceived2Line className="mr-1 text-blue-500" size={16} />
-        <span className="text-gray-100 font-semibold">Customer:</span> 
-        <span className="text-yellow-500">{getCustomerName(order.customer)}</span>
-      </div>
-      <div className="flex items-center w-full text-gray-300 font-mono text-sm mb-2">
-        <FaHourglassEnd className="mr-1 text-blue-500" size={14} />
-        <span className="text-gray-100 font-semibold">Fulfillment Time:</span> 
-        <span className="text-yellow-500">{new Date(order.fulfillmentTime).toLocaleDateString('en-US', { day: 'numeric', month: 'short' }) || 'Not given'}</span>
-        <span className="mx-2">--</span>
-        <span className="text-gray-100 font-semibold">Order Creation Date:</span> 
-        <span className="text-yellow-500">{new Date(order.orderDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short' }) || 'Not given'}</span>
-      </div>
-      <div className="flex items-center w-full text-gray-300 font-mono text-sm mb-2">
-        <FaFileInvoiceDollar className="mr-1 text-blue-500" size={16} />
-        <span className="text-gray-100 font-semibold">Payment Status:</span>
-        <span className="text-yellow-500 ml-1">{order.paymentStatus}</span>
-      </div>
-      <div className="flex items-center w-full text-gray-300 font-mono text-sm mb-2">
-        <FaFileInvoiceDollar className="mr-1 text-blue-500" size={16} />
-        <span className="text-gray-100 font-semibold">Paymen Method:</span>
-        <span className="text-yellow-500 ml-1">{order.paymentMethod}</span>
-      </div>
-      <div className="flex items-center w-full text-gray-300 font-mono text-sm mb-2">
-        <FaSitemap className="mr-1 text-blue-500" size={16} />
-          <span className="text-gray-100 font-semibold">Items:</span>
-        </div>
-        {order.items && order.items.length > 0 ? (
-          <Card className="bg-gray-800 text-white rounded-lg shadow-lg mb-4">
-            <CardBody>
-              <ul className="space-y-2">
-                {order.items.map((item, index) => (
-                  <li key={index} className="flex justify-between items-center py-1">
-                    <span className="text-sm font-medium">{getCustomerName2(item.item)}</span>
-                    <span className="text-sm text-gray-400">Quantity: {item.quantity}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardBody>
-          </Card>
-        ) : (
-          <p className="text-gray-400 text-sm">No items found.</p>
-        )}
+    ) : (
+      <>
+        <span className="text-yellow-500 ml-1">{formData.internalPO || "Not Set"}</span>
+        <EditIcon
+          className="ml-2 cursor-pointer"
+          onClick={() => setEditingField("internalPO")}
+        />
+      </>
+    )}
+  </div>
 
+  <div className="flex items-center w-full text-gray-300  text-sm mb-2">
+    <FaFileInvoiceDollar className="mr-1 text-blue-500" size={16} />
+    <span className="text-gray-400 font-semibold h-[35px] pt-2 items-center w-[110px]">Invoice Number:</span>
+    {editingField === "invoiceNumber" ? (
+      <div className="flex items-center">
+        <Input
+          name="invoiceNumber"
+          value={formData.invoiceNumber}
+          onChange={handleChange}
+          autoFocus
+        />
+        <Check
+          className="ml-2 cursor-pointer text-green-500"
+          onClick={() => {
+            handleUpdateOrder();
+            setEditingField(null);
+          }}
+        />
       </div>
+    ) : (
+      <>
+        <span className="text-yellow-500 ml-1">{formData.invoiceNumber || "Not Set"}</span>
+        <EditIcon
+          className="ml-2 cursor-pointer"
+          onClick={() => setEditingField("invoiceNumber")}
+        />
+      </>
+    )}
+  </div>
+
+  <div className="flex items-center w-full text-gray-300 text-sm mb-2">
+  <RiUserReceived2Line className="mr-1 text-blue-500" size={16} />
+  <span className="text-gray-400 font-semibold h-[35px] pt-2 items-center w-[70px]">Customer:</span>
+  {editingField === "customer" ? (
+    <div className="flex items-center">
+      <AutoComplete
+        style={{
+          width: 200,
+        }}
+        options={options2}
+        value={customerInput}  // Use for filtering
+        onSearch={(value) => {  // This is where you handle typing
+          setCustomerInput(value);
+        }}
+        onChange={(value) => {  // This is for selection
+          setFormData(prev => ({
+            ...prev,
+            customer: value // Update customer ID
+          }));
+          setCustomerInput(getCustomerName(value)); // Update input display with name
+        }}
+        placeholder="Select a customer"
+        filterOption={(inputValue, option) =>
+          option.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+        }
+      />
+      <Check
+        className="ml-2 cursor-pointer text-green-500"
+        onClick={() => {
+          handleUpdateOrder();
+          setEditingField(null);
+        }}
+      />
+    </div>
+  ) : (
+    <>
+      <span className="text-yellow-500 ml-1">{getCustomerName(formData.customer) || "Not Set"}</span>
+      <EditIcon
+        className="ml-2 cursor-pointer"
+        onClick={() => setEditingField("customer")}
+      />
+    </>
+  )}
+</div>
+
+  <div className="flex items-center w-full text-gray-300  text-sm mb-2">
+    <FaHourglassEnd className="mr-1 text-blue-500" size={14} />
+    <span className="text-gray-400 font-semibold h-[35px] pt-2 items-center w-[130px]">Fulfillment Time:</span>
+    {editingField === "fulfillmentTime" ? (
+      <div className="flex items-center">
+        <Input
+          name="fulfillmentTime"
+          value={formData.fulfillmentTime}
+          onChange={handleChange}
+          autoFocus
+        />
+        <Check
+          className="ml-2 cursor-pointer text-green-500"
+          onClick={() => {
+            handleUpdateOrder();
+            setEditingField(null);
+          }}
+        />
+      </div>
+    ) : (
+      <>
+        <span className="text-yellow-500 ml-1">
+          {new Date(formData.fulfillmentTime).toLocaleDateString("en-US", {
+            day: "numeric",
+            month: "short",
+          }) || "Not given"}
+        </span>
+        <EditIcon
+          className="ml-2 cursor-pointer"
+          onClick={() => setEditingField("fulfillmentTime")}
+        />
+      </>
+    )}
+  </div>
+
+  <div className="flex  w-full text-gray-300 font-mono text-sm mb-2 items-center " style={{alignItems:"ceter",justifyItems:"center"}}>
+        <FaFileInvoiceDollar className="mr-1 text-blue-500" size={16} />
+        <div className="text-gray-400 font-semibold h-[35px] pt-2 items-center w-[130px] " >Payment status:</div>
+        {editingField === "paymentStatus" ? (
+          <div className="flex items-center">
+            <AutoComplete
+              style={{
+                width: 200,
+                height:30
+              }}
+              options={options3}
+              value={formData.paymentStatus}
+              onChange={handlePaymentStatusChange}
+              placeholder="Enter payment Status"
+              filterOption={(inputValue, option) =>
+                option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+              }
+            />
+            <Check
+              className="ml-2 cursor-pointer text-green-500 m-0 p-0"
+              onClick={() => {
+                handleUpdateOrder();
+                setEditingField(null);
+              }}
+            />
+          </div>
+        ) : (
+          <>
+            <div className="text-yellow-500 ml-1">{formData.paymentStatus || "Not Set"}</div>
+            <EditIcon
+              className="ml-2 cursor-pointer"
+              onClick={() => setEditingField("paymentStatus")}
+            />
+          </>
+        )}
+      </div>
+  <div className="flex  w-full text-gray-300 font-mono text-sm mb-2 items-center " style={{alignItems:"ceter",justifyItems:"center"}}>
+        <FaFileInvoiceDollar className="mr-1 text-blue-500" size={16} />
+        <div className="text-gray-400 font-semibold h-[35px] pt-2 items-center w-[130px] " >Payment Method:</div>
+        {editingField === "paymentMethod" ? (
+          <div className="flex items-center">
+            <AutoComplete
+              style={{
+                width: 200,
+                height:30
+              }}
+              options={options}
+              value={formData.paymentMethod}
+              onChange={handlePaymentMethodChange}
+              placeholder="Enter payment method"
+              filterOption={(inputValue, option) =>
+                option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+              }
+            />
+            <Check
+              className="ml-2 cursor-pointer text-green-500 m-0 p-0"
+              onClick={() => {
+                handleUpdateOrder();
+                setEditingField(null);
+              }}
+            />
+          </div>
+        ) : (
+          <>
+            <div className="text-yellow-500 ml-1">{formData.paymentMethod || "Not Set"}</div>
+            <EditIcon
+              className="ml-2 cursor-pointer"
+              onClick={() => setEditingField("paymentMethod")}
+            />
+          </>
+        )}
+      </div>
+
+  <div>
+  <OrderItems 
+                        order={order} 
+                        getCustomerName2={getCustomerName2} 
+                        products={products} 
+                        handleUpdateOrder={handleUpdateOrder}
+                        setFormData={setFormData}  // Pass this to update item data
+                        formData={formData}  // Pass formData to OrderItems
+                      />
+
+    </div>
+</div>
+
+
+    
     </Tab>
     <Tab key="notes" title="Notes">
    

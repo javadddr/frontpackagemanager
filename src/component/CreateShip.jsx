@@ -14,7 +14,8 @@ const CreateShip = ({ handleCloseModal,fetchCustomers,fetchOrders,fetchShipments
   const [selectedHubId, setSelectedHubId] = useState(null);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
-console.log("selectedOrder",selectedOrder)
+  const [updatedItems, setUpdatedItems] = useState([]);
+console.log("updatedItems",updatedItems)
   const [notify, setNotify] = useState({
     shipper: false,
     receiver: false
@@ -121,6 +122,7 @@ useEffect(() => {
       setSelectedProducts={setSelectedProducts}
       selectedOrder={selectedOrder}
       setSelectedOrder={setSelectedOrder}
+      setUpdatedItems={setUpdatedItems}
 
       />,
     },
@@ -315,7 +317,28 @@ useEffect(() => {
       }
   
       const updatedShipments = await fetchShipments();
+      if (selectedOrder && selectedOrder._id && updatedItems.length > 0) {
+        for (let item of updatedItems) {
+          const updatedItemData = {
+            quantity: item.quantity,
+            shipped: item.shipped
+          };
   
+          const response = await fetch(`${backendUrl}/api/orders/${selectedOrder._id}/items/${item.item}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedItemData),
+          });
+  
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Failed to update item:', errorData.message);
+            // Optionally, add this error to messages or handle it
+          }
+        }
+      }
       setShipments(updatedShipments);
       await fetchBackendShipments();
       await fetchBackendShipments1();

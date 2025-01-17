@@ -3,14 +3,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardBody, Input } from "@nextui-org/react";
 import { useHubs } from "../HubsContext";
 import OrderShip from './OrderShip';
-function StepTwo({selectedVendorId,selectedCustomerId,selectedHubId,selectedProducts,setSelectedVendorId,setSelectedCustomerId,setSelectedHubId,setSelectedProducts,selectedOrder,setSelectedOrder}) {
+function StepTwo({selectedVendorId,selectedCustomerId,setUpdatedItems,selectedHubId,selectedProducts,setSelectedVendorId,setSelectedCustomerId,setSelectedHubId,setSelectedProducts,selectedOrder,setSelectedOrder}) {
   const { hubs,vendors,customers,products } = useHubs();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [searchTerm2, setSearchTerm2] = useState('');
   const [searchTerm3, setSearchTerm3] = useState('');
   const [isOrder, setIsOrder] = useState(null); // Start with null to show buttons
-
+  
   const handleOrderChoice = (choice) => {
     setIsOrder(choice);
     setSelectedProducts([])
@@ -129,6 +129,7 @@ function StepTwo({selectedVendorId,selectedCustomerId,selectedHubId,selectedProd
       setSelectedOrder={setSelectedOrder}
       selectedCustomerId={selectedCustomerId}
       setSelectedCustomerId={setSelectedCustomerId}
+      setUpdatedItems={setUpdatedItems}
     />
     ) : (
       // If it's not an order, show the empty div
