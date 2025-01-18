@@ -16,7 +16,7 @@ html, body {
   justify-content: center;
   width: 100vw;
   height: 100vh;
-  background-image: url('./bc1.jpg'); /* Adjust with the correct path */
+
   background-size: cover;
   background-position: 100% 10%; /* Manual positioning */
   position: relative;
