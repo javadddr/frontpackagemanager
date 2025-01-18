@@ -310,7 +310,7 @@ const handleFormSubmit = async (values) => {
   <Form.Item
     label="Fulfillment Time"
     name="fulfillmentTime"
-    rules={[{ required: true, message: "Please select the Fulfillment Time!" }]}
+    rules={[{ required: false, message: "Please select the Fulfillment Time!" }]}
     style={{ marginBottom: 8 }}
   >
     <DatePicker 
