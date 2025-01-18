@@ -16,6 +16,7 @@ import logo from "./emp.jpeg"
 import { FaTrash } from 'react-icons/fa'; // or whatever icon library you're using for the trash icon
 import { DeleteIcon } from "./DeleteIcon";
 import { EditIcon } from "./EditIcon";
+import BulkPro from "./BulkPro";
 const { Option } = Select;
 const MotionButton = motion(Button);
 const Inventory = ({productStats}) => {
@@ -226,10 +227,18 @@ const [success, setSuccess] = useState(false);
   };
   return (
     <div className="pt-6 pl-4 pr-4 pb-10 bg-zinc-900" style={{ minHeight: "100vh"}}>
-    <div className="flex justify-end">
+   
+   <div className='flex items-end justify-end mb-3  w-full '>
+   <div className="flex flex-col  items-center mr-3">
+        
+         <BulkPro />
+      </div>
+    <div>
       <Don type="primary" color="primary" variant="shadow" onClick={showModal} style={{ width: '170px',height:'35px' }}>
         Add New Product
       </Don>
+      </div>
+     
       </div>
           {/* Modal */}
           <AnimatePresence>
@@ -544,6 +553,12 @@ const [success, setSuccess] = useState(false);
               Submit
             </Button>
           </Form.Item>
+
+        
+          {/* <div className="flex flex-col justify-center items-center">
+          Or you can Bulk Upload your productStat
+<BulkPro/>
+</div> */}
      </Form>
   )}
   </motion.div>
