@@ -358,12 +358,18 @@ export default function BillingPage() {
                   <p>
                     <br />
                     <div className="text-gray-300 -mt-6 p-1 rounded-3xl shadow-3xl text-base">
-                      You will be able to track {selectedPlan.shipments} packages in 12 months after purchasing.
+                     
+                      You will have the ability to track up to {selectedPlan.shipments} packages over a period of 12 months after purchasing.
                     </div>
 
                     <div className="text-gray-300 mt-0 p-1 rounded-3xl shadow-3xl text-base">
                       You will be charged a one-time fee of ${selectedPlan.price}. Once your capacity is used up or after
                       12 months, you will need to make a new purchase (there is no subscription).
+            
+
+The cost is a one-time fee of ${selectedPlan.price}. Once your tracking capacity is used up or the 12-month period has elapsed, you will need to make a new purchase.
+
+Please note, this is not a subscription
                     </div>
                   </p>
 
