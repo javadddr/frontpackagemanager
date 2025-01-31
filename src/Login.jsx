@@ -38,7 +38,7 @@ const Login = () => {
     setIsLoading(true)
     // First POST request to /user/authByCredentials
     try {
-      const response = await fetch("https://api.globalpackagetracker.com/user/authByCredentials", {
+      const response = await fetch("https://api2.globalpackagetracker.com/user/authByCredentials", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -55,7 +55,7 @@ const Login = () => {
         localStorage.setItem("key", data.key);
   
         // Second POST request to /user/authByKey
-        const secondResponse = await fetch("https://api.globalpackagetracker.com/user/authByKey", {
+        const secondResponse = await fetch("https://api2.globalpackagetracker.com/user/authByKey", {
           method: "POST",
           headers: {
             "Content-Type": "application/json", // Set content-type as JSON
@@ -106,7 +106,7 @@ const Login = () => {
       const password = "google_register"; // Using google_register as password for consistency
   
       // Try to login first (this will fail if the user does not exist)
-      const loginResponse = await fetch("https://api.globalpackagetracker.com/user/authByCredentials", {
+      const loginResponse = await fetch("https://api2.globalpackagetracker.com/user/authByCredentials", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -122,7 +122,7 @@ const Login = () => {
         localStorage.setItem("key", loginData.key);
   
         // Second POST request to /user/authByKey
-        const secondResponse = await fetch("https://api.globalpackagetracker.com/user/authByKey", {
+        const secondResponse = await fetch("https://api2.globalpackagetracker.com/user/authByKey", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -153,7 +153,7 @@ const Login = () => {
         setSuccessMessage("You are a new user. We need to register your account: Registering...");
         setIsSuccess(true);
         
-        const registerResponse = await fetch("https://api.globalpackagetracker.com/user/register", {
+        const registerResponse = await fetch("https://api2.globalpackagetracker.com/user/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -171,7 +171,7 @@ const Login = () => {
           setSuccessMessage("Registration successful! Creating the account...");
           
           // After registration, try to login again
-          const loginAfterRegisterResponse = await fetch("https://api.globalpackagetracker.com/user/authByCredentials", {
+          const loginAfterRegisterResponse = await fetch("https://api2.globalpackagetracker.com/user/authByCredentials", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -186,7 +186,7 @@ const Login = () => {
             localStorage.setItem("key", loginAfterRegisterData.key);
   
             // Second POST request to /user/authByKey after registration
-            const authByKeyResponse = await fetch("https://api.globalpackagetracker.com/user/authByKey", {
+            const authByKeyResponse = await fetch("https://api2.globalpackagetracker.com/user/authByKey", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",

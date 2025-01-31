@@ -58,7 +58,7 @@ const Register = () => {
     }
     try {
       // First POST request to /user/register
-      const response = await fetch("https://api.globalpackagetracker.com/user/register", {
+      const response = await fetch("https://api2.globalpackagetracker.com/user/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -78,7 +78,7 @@ const Register = () => {
         setSuccessMessage("Registration successful!");
   
         // Second POST request to /user/authByCredentials (login)
-        const loginResponse = await fetch("https://api.globalpackagetracker.com/user/authByCredentials", {
+        const loginResponse = await fetch("https://api2.globalpackagetracker.com/user/authByCredentials", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -97,7 +97,7 @@ const Register = () => {
           localStorage.setItem("key", loginData.key);
   
           // Second POST request to /user/authByKey
-          const secondResponse = await fetch("https://api.globalpackagetracker.com/user/authByKey", {
+          const secondResponse = await fetch("https://api2.globalpackagetracker.com/user/authByKey", {
             method: "POST",
             headers: {
               "Content-Type": "application/json", // Set content-type as JSON
@@ -146,7 +146,7 @@ const Register = () => {
       setSuccessMessagew("Registration started!")
       setIsWorking(true);
       // First POST request to /user/register
-      const response = await fetch("https://api.globalpackagetracker.com/user/register", {
+      const response = await fetch("https://api2.globalpackagetracker.com/user/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -167,7 +167,7 @@ const Register = () => {
         setSuccessMessage("Registration successful!");
   
         // Second POST request to /user/authByCredentials (login)
-        const loginResponse = await fetch("https://api.globalpackagetracker.com/user/authByCredentials", {
+        const loginResponse = await fetch("https://api2.globalpackagetracker.com/user/authByCredentials", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -186,7 +186,7 @@ const Register = () => {
           localStorage.setItem("key", loginData.key);
           setSuccessMessage("Creating Your Account...!");
           // Second POST request to /user/authByKey
-          const secondResponse = await fetch("https://api.globalpackagetracker.com/user/authByKey", {
+          const secondResponse = await fetch("https://api2.globalpackagetracker.com/user/authByKey", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
