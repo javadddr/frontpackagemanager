@@ -4,7 +4,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../src
 import { Info } from 'react-feather'; // Assuming you're using react-feather for icons, adjust accordingly
 import { useHubs } from "./HubsContext";
 import Loading from './Loading';
+import Combain from './Combain';
 import moment from 'moment'; 
+import ForthSmal from './ForthSmal';
 import { IoSquareSharp } from "react-icons/io5";
 import Calendari2 from './component/Calenderi2';
 import { ChartContainer,ChartTooltip, ChartTooltipContent } from "./component/ui/chart";
@@ -16,37 +18,63 @@ import TransitChart from './component/TransitChart';
 import ProChart from "./ProChart";
 import ProChange from "./ProChange";
 import ProHub from "./ProHub";
+import Seconsmall from './Seconsmall';
+import Thirdsmall from './Thirdsmall';
 function Dashboard({productStats,otherShipments}) {
 
  
-  const { shipments, backendShipments, backendShipments1,totalReturn,fetchShipments,shipped,returnedCus,returnVen, backendShipments2 } = useHubs();
-  const now = moment();
-const startOfWeek = now.clone().startOf('isoWeek');
-const endOfWeek = now.clone().endOf('isoWeek');
-console.log("shipments",shipments)
-let returnCounti = 0;
-let shipCounti = 0;
+  const { shipments,io, backendShipments, backendShipments1,totalReturn,fetchShipments,shipped,returnedCus,returnVen, backendShipments2 } = useHubs();
+  const [returnCounti, setReturnCounti] = useState(0);
+  console.log("io",io)
+  const [shipCounti, setShipCounti] = useState(0);
+  const [chartData20, setChartData20] = useState([]);
+  const [chartConfig20, setchartConfig20] = useState({});
+  useEffect(() => {
+    const now = moment();
+    const startOfWeek = now.clone().startOf('isoWeek');
+    const endOfWeek = now.clone().endOf('isoWeek');
 
-// Loop through totalReturn for returns within the current week
-if (Array.isArray(totalReturn)) {
-  totalReturn.forEach(shipment => {
-    const shipmentDate = moment(shipment.shipping_date);
-    if (shipmentDate.isBetween(startOfWeek, endOfWeek, null, '[]')) {
-      returnCounti++;
+    let newReturnCount = 0;
+    let newShipCount = 0;
+
+    // Count returns within the current week
+    if (Array.isArray(totalReturn)) {
+      totalReturn.forEach(shipment => {
+        const shipmentDate = moment(shipment.shipping_date);
+        if (shipmentDate.isBetween(startOfWeek, endOfWeek, null, '[]')) {
+          newReturnCount++;
+        }
+      });
     }
-  });
-}
 
-// Loop through otherShipments for shipped items within the current week
-if (Array.isArray(otherShipments)) {
-  otherShipments.forEach(shipment => {
-    const shipmentDate = moment(shipment.shipping_date);
-    if (shipmentDate.isBetween(startOfWeek, endOfWeek, null, '[]')) {
-      shipCounti++;
+    // Count shipments within the current week
+    if (Array.isArray(otherShipments)) {
+      otherShipments.forEach(shipment => {
+        const shipmentDate = moment(shipment.shipping_date);
+        if (shipmentDate.isBetween(startOfWeek, endOfWeek, null, '[]')) {
+          newShipCount++;
+        }
+      });
     }
-  });
-}
-
+    setChartData20([
+      { name: 'Return', count: newReturnCount, fill: "hsl(var(--chart-1))" },
+      { name: 'Shipped', count: newShipCount, fill: "hsl(var(--chart-2))" },
+    ]);
+    setchartConfig20({
+      Return: {
+        label: "Return",
+        color: "var(--chart-1)",
+              icon: (props) => <IoSquareSharp size={16} style={{ color: 'rgb(47, 114, 235)', marginRight: "-6px", marginTop: "1px" }} />,
+      },
+      Shipped: {
+        label: "Shipped",
+        color: "var(--chart-2)",
+      }
+    });
+    // Update states
+    setReturnCounti(newReturnCount);
+    setShipCounti(newShipCount);
+  }, [backendShipments]); 
 // Use returnCounti and shipCounti as needed
 
   const [shippedShipments, setShippedShipments] = useState([]);
@@ -224,21 +252,21 @@ if (Array.isArray(otherShipments)) {
     }
  
   }, [shipments, backendShipments, backendShipments1, backendShipments2]);
-  const chartData20 = [
-    { name: 'Return', count: returnCounti, fill: "hsl(var(--chart-1))" },
-    { name: 'Shipped', count: shipCounti, fill: "hsl(var(--chart-2))" },
-  ];
-  const chartConfig20 = {
-    Return: {
-      label: "Return",
-      color: "var(--chart-1)",
-            icon: (props) => <IoSquareSharp size={16} style={{ color: 'rgb(47, 114, 235)', marginRight: "-6px", marginTop: "1px" }} />,
-    },
-    Shipped: {
-      label: "Shipped",
-      color: "var(--chart-2)",
-    }
-  };
+  // const chartData20 = [
+  //   { name: 'Return', count: returnCounti, fill: "hsl(var(--chart-1))" },
+  //   { name: 'Shipped', count: shipCounti, fill: "hsl(var(--chart-2))" },
+  // ];
+  // const chartConfig20 = {
+  //   Return: {
+  //     label: "Return",
+  //     color: "var(--chart-1)",
+  //           icon: (props) => <IoSquareSharp size={16} style={{ color: 'rgb(47, 114, 235)', marginRight: "-6px", marginTop: "1px" }} />,
+  //   },
+  //   Shipped: {
+  //     label: "Shipped",
+  //     color: "var(--chart-2)",
+  //   }
+  // };
 
   useEffect(() => {
     setTimeout(() => setIsLoading(false), 500);
@@ -376,7 +404,8 @@ if (Array.isArray(otherShipments)) {
               </Tooltip>
               </TooltipProvider>
             </div>
-            <span className='text-4xl -mt-3 text-gray-100 '>{shipments.length}</span> 
+          
+            <span className='text-4xl -mt-3 text-lime-600'>{shipments.length}</span> 
           </div>
         </CardTitle>
       </CardHeader>
@@ -445,275 +474,11 @@ if (Array.isArray(otherShipments)) {
       </CardContent>
     </Card>
 
-        <Card className="dark">
-          <CardHeader>
-            <CardTitle>
-            <div className='flex justify-between'>
-          <div>
-            <span>Shipments Shipped  </span>
-              
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info size={17} className="inline  text-gray-100 cursor-pointer" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Shipments that have been sent out.</p>
-                  </TooltipContent>
-                
-                </Tooltip>
-              </TooltipProvider>
-              </div>
-            <span className='text-4xl -mt-3 text-lime-600 '>{countUnmatchedShipments(shipments, backendShipments1, backendShipments2)}</span> 
-          </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-        <div className="flex p-0 flex-col items-center">
-          <div className="w-[200px] p-0 ">
-            <ChartContainer className="h-[100px]" config={chartConfig}>
-              <BarChart
-                accessibilityLayer
-                data={chartData1} 
-                margin={{
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  top:0 // Adjust this as needed
-                }}
-              >
-            <XAxis
-    dataKey="week"
-    tickLine={false}
-    axisLine={false}
-    tickMargin={8}
-    tickFormatter={(value) => value.slice(4)}
-    reversed
-    label={{  position: 'insideBottom', dy: 10 }}
-  />
-                     <ChartTooltip
-  content={
-    <ChartTooltipContent 
-    className="w-[150px]"
-    >
-     {(props) => {
-        if (!props.active || !props.payload) return null;
+    <Seconsmall/>
 
-        return (
-          <div>
-            {props.payload.map((entry, index) => {
-              const IconComponent = chartConfig[entry.dataKey]?.icon;
-              const color = chartConfig[entry.dataKey]?.color || "hsl(var(--chart-2))";
+    <Thirdsmall/>
 
-              return (
-                <div key={`item-${index}`} style={{ display: 'flex', alignItems: 'center' ,color:'yellow'}}>
-                  {IconComponent && 
-                    <IconComponent size={10} style={{ color: color }} /> // Here's where we color the icon
-                  }
-                  <span style={{ marginLeft: '0px' }}>{`${entry.name}: ${entry.value}`}</span>
-                </div>
-              );
-            })}
-          </div>
-        );
-      }}
-    </ChartTooltipContent>
-  }
-/>
-          
-                <Bar
-                  dataKey="count"
-                  fill="var(--color-count)"
-                  radius={[4, 4, 0, 0]} // Optional: to round the top of the bars
-                />
-              </BarChart>
-            </ChartContainer>
-          </div>
-        </div>
-      </CardContent>
-        </Card>
-
-        <Card className="dark">
-          <CardHeader>
-            <CardTitle>
-            <div className='flex justify-between'>
-          <div>
-            <span>Returns</span>
-              
-              
-          
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info size={17} className="inline ml-1  text-gray-100 cursor-pointer" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Total returns from both customers and vendors.</p>
-            
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              </div>
-            <span className='text-4xl -mt-3 text-yellow-600 '>{shipments.length-otherShipments.length}</span> 
-          </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-    
-          <div className="flex p-0 flex-col items-center">
-    <div className="w-[200px] p-0 ">
-      <ChartContainer className="h-[100px]" config={chartConfig2}>
-        <BarChart
-          accessibilityLayer
-          data={mergeData(chartData3, chartData4)} 
-          margin={{
-            left: 0,
-            right: 0,
-            bottom: 0,
-            top: 0
-          }}
-        >
-          <XAxis
-            dataKey="week"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            tickFormatter={(value) => value.slice(4)}
-            reversed
-            label={{ position: 'insideBottom', dy: 10 }}
-          />
-                    <ChartTooltip
-  content={
-    <ChartTooltipContent 
-    className="w-[200px]"
-    >
-     {(props) => {
-        if (!props.active || !props.payload) return null;
-
-        return (
-          <div>
-            {props.payload.map((entry, index) => {
-              const IconComponent = chartConfig2[entry.dataKey]?.icon;
-              const color = chartConfig2[entry.dataKey]?.color || "hsl(var(--chart-2))";
-
-              return (
-                <div key={`item-${index}`} style={{ display: 'flex', alignItems: 'center' ,color:'yellow'}}>
-                  {IconComponent && 
-                    <IconComponent size={10} style={{ color: color }} /> // Here's where we color the icon
-                  }
-                  <span style={{ marginLeft: '0px' }}>{`${entry.name}: ${entry.value}`}</span>
-                </div>
-              );
-            })}
-          </div>
-        );
-      }}
-    </ChartTooltipContent>
-  }
-/>
-          <Bar 
-            dataKey="customerReturns" 
-            fill="hsl(217, 94%, 65%)" 
-            stackId="a" 
-            radius={[0, 0, 0, 0]} // Rounds the top corners
-          />
-          <Bar 
-            dataKey="vendorReturns" 
-            fill="hsl(259, 94%, 65%)" 
-            stackId="a" 
-            radius={[4, 4, 0, 0]} // Rounds the bottom corners
-          />
-        </BarChart>
-      </ChartContainer>
-    </div>
-  </div>
-          </CardContent>
-        </Card>
-
-        <Card className="dark">
-  <CardHeader>
-    <CardTitle>
-      <div className='flex justify-between'>
-        <div>
-          <span>This Week's Shipments</span>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Info size={17} className="inline ml-1 text-gray-100 cursor-pointer" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Shipments that were sent or returned this week (Based on Shipping Date)</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <span className='text-4xl -mt-3 text-red-600 '>{returnCounti + shipCounti}</span>
-      </div>
-    </CardTitle>
-  </CardHeader>
-  <CardContent>
-    <div className="flex p-0 flex-col items-center">
-      <div className="w-[200px] p-0 ">
-        <ChartContainer className="h-[100px]" config={chartConfig20}>
-          <BarChart
-            accessibilityLayer
-            data={chartData20}
-            margin={{
-              left: 0,
-              right: 0,
-              bottom: 0,
-              top: 0 // Adjust this as needed
-            }}
-          >
-            <XAxis
-              dataKey="name" // Use 'name' as the data key since that's what you have in your data
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              reversed
-              label={{ position: 'insideBottom', dy: 10 }}
-            />
-            <ChartTooltip
-                  content={
-                    <ChartTooltipContent 
-                    className="w-[100px]"
-                    >
-                    {(props) => {
-                        if (!props.active || !props.payload) return null;
-
-                        return (
-                          <div>
-                            {props.payload.map((entry, index) => {
-                              const IconComponent = chartConfig20[entry.dataKey]?.icon;
-                              const color = chartConfig20[entry.dataKey]?.color || "hsl(var(--chart-2))";
-
-                              return (
-                                <div key={`item-${index}`} style={{ display: 'flex', alignItems: 'center' ,color:'yellow'}}>
-                                  {IconComponent && 
-                                    <IconComponent size={10} style={{ color: color }} /> // Here's where we color the icon
-                                  }
-                                  <span style={{ marginLeft: '0px' }}>{`${entry.name}: ${entry.value}`}</span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        );
-                      }}
-                    </ChartTooltipContent>
-                  }
-                />
-            {/* Single Bar for all data with dynamic coloring */}
-            <Bar 
-  dataKey="count"
-  fill={(entry) => entry.fill}
-  radius={[4, 4, 0, 0]}
-/>
-          </BarChart>
-        </ChartContainer>
-      </div>
-    </div>
-  </CardContent>
-</Card>
+    <ForthSmal/>
       </div>
       <Calendari2 otherShipments2={otherShipments} shipments={shipments} returnedCus={returnedCus} returnVen={returnVen}/>
       <div>
@@ -735,9 +500,11 @@ if (Array.isArray(otherShipments)) {
 <ProChange/>
 <ProHub/>
 </div>
-      
+      {/* <Thirdsmall/> */}
+   
     </div>
       )}
+
       </div>
   );
 }

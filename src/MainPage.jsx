@@ -88,8 +88,24 @@ const MainPage = () => {
         { label: "Customers", key: "5-3" },
       ],
     },
-    { label: `Capacity: ${userData?.capacity || 0}`, key: "6" ,style: { backgroundColor: "#12A150",color:"black",fontSize:"14px",marginTop:"330px",height:"25px",textAlign:"start" }, icon: <GrCapacity style={{ fontSize: "19px",height:"30px" }} /> },
-    { label: "Contact us", key: "7",style: { backgroundColor: "#09AACD",color:"black",fontSize:"14px" ,height:"25px",textAlign:"start"}, icon: <MdOutlineContactMail style={{ fontSize: "19px",height:"30px" }} /> },
+    {
+      label: (
+        <span style={{ lineHeight: "0" }}>
+          <span className="pl-1 text-base">{userData?.capacity || 0}: </span> Purchase Capacity
+        </span>
+      ),
+      key: "6",
+      style: {
+        backgroundColor: "#12A150",
+        color: "black",
+        fontSize: "14px",
+        marginTop: "280px",
+        height: "25px",
+        textAlign: "start",
+      },
+      icon: <GrCapacity style={{ fontSize: "19px", height: "30px" }} />,
+    },
+    { label: "Contact us", key: "7",style: { backgroundColor: "#09AACD",color:"black",fontSize:"14px" ,height:"25px",textAlign:"start"}, icon: <MdOutlineContactMail style={{ fontSize: "19px",height:"30px",marginRight:"2px" }} /> },
     { label: "Log out", key: "8",style: { backgroundColor: "#936316",color:"black",fontSize:"14px" ,height:"25px",textAlign:"start"}, icon: <IoMdLogOut style={{ fontSize: "19px",height:"30px" }} /> },
   ];
   // Define getNameById as a standalone function

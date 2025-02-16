@@ -26,7 +26,7 @@ export const HubsProvider = ({ children }) => {
   const [otherShipments, setOtherShipments] = useState([]);
   const [totalReturn, setTotalReturn] = useState([]);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
+  const [io, setIo] = useState([]);
   // Fetch hubs from API
   const fetchHubs = async () => {
     try {
@@ -165,6 +165,41 @@ const fetchShipments = async () => {
   } catch (error) {
     console.error("Error fetching shipments:", error.message);
     setShipments([]); 
+  }
+};
+//fetch all of the shpments from backends these shipments shows everything
+
+const fetchAllBack = async () => {
+  const ownerKey = localStorage.getItem("key");
+  const currentDate = new Date();
+  
+  // Set endDate to the end of tomorrow
+  const tomorrow = new Date(currentDate);
+  tomorrow.setDate(currentDate.getDate() + 1);
+  tomorrow.setHours(23, 59, 59, 999); // Set to the end of the day
+  const endDate = tomorrow.toISOString().split('T')[0]; // Tomorrow's end date in YYYY-MM-DD format
+
+  const startDate = new Date(currentDate); 
+  startDate.setMonth(startDate.getMonth() - 3); // Set to 3 months ago
+  const formattedStartDate = startDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+
+  try {
+    const response = await fetch(`${backendUrl}/api/combined-shipments/combined?startDate=${formattedStartDate}&endDate=${endDate}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'owner': ownerKey
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    setIo(data);
+  } catch (error) {
+    console.error('There was an error fetching the shipments:', error);
   }
 };
 
@@ -387,6 +422,7 @@ useEffect(() => {
       await fetchVendors();
       await fetchCustomers();
       await fetchOrders();
+      await fetchAllBack();
       if (Array.isArray(shipments) && Array.isArray(backendShipments)) filterShipped();
       if (Array.isArray(shipments) && Array.isArray(backendShipments1)) filterReturnedCus();
       if (Array.isArray(shipments) && Array.isArray(backendShipments2)) filterReturnVen();
@@ -429,9 +465,9 @@ useEffect(() => {
 }, [shipments, backendShipments1, backendShipments2]);
   return (
     <HubsContext.Provider value={{ 
-      hubs, products, vendors, customers, shipments, returnedCus, returnVen,totalReturn, backendShipments,backendShipments1,backendShipments2,shipped, otherShipments,orders, // Add customers here
+      hubs, products, vendors, customers, shipments, returnedCus, returnVen,totalReturn, backendShipments,backendShipments1,backendShipments2,shipped, otherShipments,orders,io, // Add customers here
       fetchHubs, fetchProducts, fetchVendors, fetchCustomers,fetchShipments, fetchBackendShipments,fetchBackendShipments1,fetchBackendShipments2, fetchOrders, // Include fetchCustomers
-      setHubs, setProducts, setVendors, setCustomers,setShipments, setBackendShipments, setBackendShipments1, setBackendShipments2, setOrders  // Include setCustomers
+      setHubs, setProducts, setVendors,setIo, setCustomers,setShipments, setBackendShipments, setBackendShipments1, setBackendShipments2, setOrders  // Include setCustomers
     }}>
       {children}
     </HubsContext.Provider>
