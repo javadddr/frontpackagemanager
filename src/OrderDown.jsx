@@ -17,7 +17,8 @@ function OrderDown() {
   const [draggedOrder, setDraggedOrder] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [needsUpdate, setNeedsUpdate] = useState(false);
+
+  const [needsUpdate, setNeedsUpdate] = useState(true);
   useEffect(() => {
     const processOrders = async () => {
       const newStatusPipelines = statusOrder.reduce((acc, status) => {
@@ -26,57 +27,77 @@ function OrderDown() {
       }, {});
   
       for (const order of orders) {
-        // Check if the order has any tracking numbers
-        if (order.tracking_numbers && order.tracking_numbers.length > 0) {
-          const trackingNumber = order.tracking_numbers[0].trackingNumber; // Assuming we check the first tracking number
-          const matchedShipment = shipments.find(s => s.tracking_number === trackingNumber);
-          
-          if (matchedShipment) {
-            // If the shipment exists and is delivered, update order status to 'Delivered'
-            if (matchedShipment.delivery_status === 'Delivered') {
-              await updateOrderStatus(order._id, 'Delivered');
-            } else {
-              // If not delivered but has a tracking number, update to 'Shipped'
-              await updateOrderStatus(order._id, 'Shipped');
+        let newStatus = order.status;
+  
+        const allItemsShipped = order.items.every(item => item.quantity === item.shipped);
+  
+        if (allItemsShipped && order.tracking_numbers && order.tracking_numbers.length > 0) {
+          const trackingStatuses = order.tracking_numbers.map(tn => {
+            const matchedShipment = shipments.find(s => s.tracking_number === tn.trackingNumber);
+            return matchedShipment ? matchedShipment.delivery_status : 'Unknown';
+          });
+  
+          console.log(`Order ${order.orderId}: All Shipped: ${allItemsShipped}, Tracking Statuses:`, trackingStatuses);
+  
+          if (trackingStatuses.length > 0) {
+            const allDelivered = trackingStatuses.every(status => status === 'Delivered');
+            const anyTransitOrCreated = trackingStatuses.some(status => 
+              status === 'Transit' || status === 'Created'
+            );
+  
+            if (allDelivered) {
+              newStatus = 'Delivered';
+            } else if (anyTransitOrCreated) {
+              newStatus = 'Shipped';
             }
           }
+  
+          if (newStatus !== order.status) {
+            console.log(`Updating order ${order.orderId} from ${order.status} to ${newStatus}`);
+            await updateOrderStatus(order._id, newStatus);
+          }
         }
-        // After potentially updating the order, place it in its correct pipeline
-        newStatusPipelines[order.status].push(order);
-       
+  
+        newStatusPipelines[newStatus].push(order);
       }
+  
       setStatusPipelines(newStatusPipelines);
       setNeedsUpdate(false);
     };
   
-    if (needsUpdate) {
-      processOrders();
-    }
-  }, [orders,needsUpdate, shipments]);
-  
+    processOrders(); // Run immediately on mount and whenever dependencies change
+  }, [orders, shipments, fetchOrders]);
   // Helper function to update order status
   const updateOrderStatus = async (orderId, newStatus) => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    const owner = localStorage.getItem("key");
+  
     try {
+      console.log(`PATCHing order ${orderId} with status ${newStatus}, owner: ${owner}`);
       const response = await fetch(`${backendUrl}/api/orders/${orderId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'x-owner': localStorage.getItem("key")
+          'x-owner': owner
         },
         body: JSON.stringify({ status: newStatus })
       });
-      if (!response.ok) throw new Error('Failed to update order status');
-      // Update local state instead of fetching all orders
-      setOrders(prevOrders => prevOrders.map(order => 
-        order._id === orderId ? { ...order, status: newStatus } : order
-      ));
-      setNeedsUpdate(true);
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.message || `Failed to update order status: ${response.status}`);
+      }
+  
+      console.log(`Order ${orderId} updated successfully:`, data.order);
+      await fetchOrders(); // Sync with server
     } catch (error) {
-      console.error("Error updating order status:", error);
+      console.error(`Error updating order ${orderId} status:`, error.message);
+      // Optionally revert local state if needed, but fetchOrders should handle it
     }
   };
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  
   useEffect(() => {
     const newStatusPipelines = statusOrder.reduce((acc, status) => {
       acc[status] = orders.filter(order => order.status === status);
@@ -104,31 +125,44 @@ function OrderDown() {
     e.preventDefault();
   };
 
-  const handleDrop = (e, newStatus) => {
+  const handleDrop = async (e, newStatus) => {
     e.preventDefault();
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const orderId = e.dataTransfer.getData('text');
     const orderToMove = draggedOrder;
-
+  
     if (orderToMove && !['Shipped', 'Delivered'].includes(newStatus)) {
       const oldStatus = orderToMove.status;
       const newPipelines = { ...statusPipelines };
       newPipelines[oldStatus] = newPipelines[oldStatus].filter(o => o._id !== orderId);
       newPipelines[newStatus].push({ ...orderToMove, status: newStatus });
       setStatusPipelines(newPipelines);
-
-      // Update the order status in the backend
-      // This part assumes you have an endpoint to update order status
-      fetch(`${backendUrl}/api/orders/${orderId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-owner': localStorage.getItem("key") // Assume this is how you pass owner info
-        },
-        body: JSON.stringify({ status: newStatus })
-      })
-
-      .catch(error => console.error("Error updating order status:", error));
+  
+      console.log("orderId", orderId);
+      console.log("newStatus", newStatus);
+  
+      try {
+        // Update the order status in the backend
+        const response = await fetch(`${backendUrl}/api/orders/${orderId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-owner': localStorage.getItem("key")
+          },
+          body: JSON.stringify({ status: newStatus })
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to update order status');
+        }
+  
+        // Fetch updated orders from backend to sync frontend state
+        await fetchOrders();
+      } catch (error) {
+        console.error("Error updating order status:", error);
+        // Optionally revert UI change on failure
+        setStatusPipelines(statusPipelines); // Reset to previous state
+      }
     }
     setDraggedOrder(null);
   };
@@ -138,16 +172,14 @@ function OrderDown() {
     order.orderId,
     getCustomerName(order.customer),
     new Date(order.fulfillmentTime).toLocaleDateString('en-US', { day: 'numeric', month: 'short' }),
-    getCustomerName2(order.itemsList),
     order.quantity,
     order.orderPriority
   ].join(' ').toLowerCase();
   return searchContent.includes(searchTerm.toLowerCase());
 };
 
-
 const handleCardClick = (order) => {
-  console.log("order",order)
+  console.log("order", order);
   setSelectedOrder(order);
   onOpen();
 };
@@ -166,7 +198,7 @@ const handleCardClick = (order) => {
     input: [
       "bg-gray-800",
       "text-base", // Changed to white and larger text
-  "flex",
+      "flex",
  
     ],
     innerWrapper: "bg-transparent",
@@ -203,7 +235,7 @@ const handleCardClick = (order) => {
         {statusOrder.map((status) => (
           <Button 
             key={status}
-        variant="flat"
+            variant="flat"
             color={ 
               status === 'Pending' ? 'primary' :
               status === 'Processing' ? 'warning' :

@@ -25,7 +25,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure
 function ShipDown1({shipments,returnedCus,fetchShipments}) {
 
 
-  const { backendShipments1,fetchBackendShipments1 } = useHubs();
+  const { backendShipments1,fetchBackendShipments1,io } = useHubs();
   const [checkedShipments, setCheckedShipments] = useState([]);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +43,10 @@ function ShipDown1({shipments,returnedCus,fetchShipments}) {
   const [selected, setSelected] = useState(["Transit", "Delivered","Exception", "Pending","Created"]);
   const [shippingDates, setShippingDates] = useState(new Set());
   const [selectedRange, setSelectedRange] = useState(null); // State to hold selected range
-  const [filteredShipments, setFilteredShipments] = useState(returnedCus);
+
+  const [filteredShipments, setFilteredShipments] = useState(
+    io.filter(shipment => shipment.status === "cusReturn")
+  );
   const [finalShipments, setFinalShipments] = useState(filteredShipments);
   const [searchTerm, setSearchTerm] = useState('');
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
@@ -169,35 +172,35 @@ useEffect(() => {
     });
     setFinalShipments(searchedShipments);
   }
-  const deliveredCount = returnedCus.reduce((count, shipment) => {
+  const deliveredCount = filteredShipments.reduce((count, shipment) => {
     // Note: JavaScript is case-sensitive, so make sure the comparison matches exactly
     if (shipment.delivery_status && shipment.delivery_status === 'Delivered') {
       return count + 1;
     }
     return count;
   }, 0);
-  const tranCount = returnedCus.reduce((count, shipment) => {
+  const tranCount = filteredShipments.reduce((count, shipment) => {
     // Note: JavaScript is case-sensitive, so make sure the comparison matches exactly
     if (shipment.delivery_status && shipment.delivery_status === 'Transit') {
       return count + 1;
     }
     return count;
   }, 0);
-  const exCount = returnedCus.reduce((count, shipment) => {
+  const exCount = filteredShipments.reduce((count, shipment) => {
     // Note: JavaScript is case-sensitive, so make sure the comparison matches exactly
     if (shipment.delivery_status && shipment.delivery_status === 'Exception') {
       return count + 1;
     }
     return count;
   }, 0);
-  const creaCount = returnedCus.reduce((count, shipment) => {
+  const creaCount = filteredShipments.reduce((count, shipment) => {
     // Note: JavaScript is case-sensitive, so make sure the comparison matches exactly
     if (shipment.delivery_status && shipment.delivery_status === 'Created') {
       return count + 1;
     }
     return count;
   }, 0);
-  const penCount = returnedCus.reduce((count, shipment) => {
+  const penCount = filteredShipments.reduce((count, shipment) => {
     // Note: JavaScript is case-sensitive, so make sure the comparison matches exactly
     if (shipment.delivery_status && shipment.delivery_status === 'Pending') {
       return count + 1;
@@ -210,7 +213,7 @@ useEffect(() => {
   setcreaCount(creaCount) 
   setpenCount(penCount)
   setDeliveredCount(deliveredCount)
-}, [searchTerm, filteredShipments]);
+}, [searchTerm, filteredShipments,deliveredCount,tranCount,exCount,creaCount,penCount]);
 const handleDelete = (shipment) => {
   setShipmentToDelete(shipment);
   onOpen();
@@ -350,7 +353,7 @@ const handleEdit = (id) => {
           </div>
         </div>
     
-        {returnedCus.length>0 && <Calender otherShipments={returnedCus}/>}
+        {returnedCus.length>0 && <Calender otherShipments={filteredShipments}/>}
         <div className="flex flex-col justify-center m-5 gap-4  justify-center items-center content-center  mb-0 mt-3">
         {finalShipments && finalShipments.length > 0 ? (
            <>

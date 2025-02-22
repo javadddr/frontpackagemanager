@@ -19,7 +19,11 @@ function ForthSmal() {
       sevenDaysAgo.setDate(now.getDate() - 7);
 
       const lastWeekShipments = io.filter(item => {
-        const itemDate = new Date(item.shipping_date);
+        const dateToUse = item.shipping_date && !isNaN(new Date(item.shipping_date).getTime()) 
+          ? item.shipping_date 
+          : item.createdAtv2;
+        
+        const itemDate = new Date(dateToUse);
         return itemDate >= sevenDaysAgo && itemDate <= now;
       });
 

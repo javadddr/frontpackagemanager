@@ -23,9 +23,9 @@ import Thirdsmall from './Thirdsmall';
 function Dashboard({productStats,otherShipments}) {
 
  
-  const { shipments,io, backendShipments, backendShipments1,totalReturn,fetchShipments,shipped,returnedCus,returnVen, backendShipments2 } = useHubs();
+  const { shipments,io, backendShipments, backendShipments1,totalReturn,fetchShipments,shipped,returnedCus,returnVen, backendShipments2,fetchAllBack } = useHubs();
   const [returnCounti, setReturnCounti] = useState(0);
-  console.log("io",io)
+
   const [shipCounti, setShipCounti] = useState(0);
   const [chartData20, setChartData20] = useState([]);
   const [chartConfig20, setchartConfig20] = useState({});
@@ -40,17 +40,30 @@ function Dashboard({productStats,otherShipments}) {
     // Count returns within the current week
     if (Array.isArray(totalReturn)) {
       totalReturn.forEach(shipment => {
-        const shipmentDate = moment(shipment.shipping_date);
-        if (shipmentDate.isBetween(startOfWeek, endOfWeek, null, '[]')) {
-          newReturnCount++;
+        // Pick the first valid date: shipping_date or createdAtv2
+        const dateToUse = shipment.shipping_date && moment(shipment.shipping_date).isValid() 
+          ? shipment.shipping_date 
+          : (shipment.createdAtv2 && moment(shipment.createdAtv2).isValid() 
+            ? shipment.createdAtv2 
+            : null);
+        
+        // Only count if we have a valid date
+        if (dateToUse) {
+          const shipmentDate = moment(dateToUse);
+          if (shipmentDate.isBetween(startOfWeek, endOfWeek, null, '[]')) {
+            newReturnCount++;
+          }
         }
       });
     }
 
-    // Count shipments within the current week
     if (Array.isArray(otherShipments)) {
       otherShipments.forEach(shipment => {
-        const shipmentDate = moment(shipment.shipping_date);
+        const dateToUse = shipment.shipping_date && moment(shipment.shipping_date).isValid() 
+          ? shipment.shipping_date 
+          : shipment.createdAtv2;
+        
+        const shipmentDate = moment(dateToUse);
         if (shipmentDate.isBetween(startOfWeek, endOfWeek, null, '[]')) {
           newShipCount++;
         }
@@ -135,9 +148,13 @@ function Dashboard({productStats,otherShipments}) {
       
         // Create an array of unique dates
         const dates = shipments
-          .map(shipment => moment(shipment.shipping_date).startOf('day').toISOString())
-          .filter(Boolean); // Ensure no undefined or null values
-      
+        .map(shipment => {
+          const dateToUse = shipment.shipping_date && moment(shipment.shipping_date).isValid() 
+            ? shipment.shipping_date 
+            : shipment.createdAtv2;
+          return moment(dateToUse).startOf('day').toISOString();
+        })
+        .filter(Boolean); // Still ensures no invalid dates slip through
         // Group dates by week
         const datesByWeek = dates.reduce((acc, date) => {
           const week = moment(date).isoWeek();
@@ -169,9 +186,14 @@ function Dashboard({productStats,otherShipments}) {
         // Match tracking numbers with shipment data to get shipping dates
         const shippingDates = allTrackingNumbers.map(trackingNumber => {
           const matchingShipment = shipments.find(ship => ship.tracking_number === trackingNumber);
-          return matchingShipment ? moment(matchingShipment.shipping_date).startOf('day').toISOString() : null;
+          if (!matchingShipment) return null;
+          
+          const dateToUse = matchingShipment.shipping_date && moment(matchingShipment.shipping_date).isValid() 
+            ? matchingShipment.shipping_date 
+            : matchingShipment.createdAtv2;
+          
+          return moment(dateToUse).startOf('day').toISOString();
         }).filter(Boolean); // Filter out any null values
-      
         // Group dates by week
         const datesByWeek = shippingDates.reduce((acc, date) => {
           const week = moment(date).isoWeek();
@@ -192,8 +214,13 @@ function Dashboard({productStats,otherShipments}) {
         const aggregatedData = {};
   
         shipments.forEach((shipment) => {
-          const shippingDate = moment(shipment.shipping_date).format('YYYY-MM-DD'); // Format the date
-  
+          // Use shipping_date if valid, otherwise fall back to createdAtv2
+          const dateToUse = shipment.shipping_date && moment(shipment.shipping_date).isValid() 
+            ? shipment.shipping_date 
+            : shipment.createdAtv2;
+          
+          const shippingDate = moment(dateToUse).format('YYYY-MM-DD'); // Format the date
+        
           // Initialize the date entry if not already initialized
           if (!aggregatedData[shippingDate]) {
             aggregatedData[shippingDate] = {
@@ -204,6 +231,7 @@ function Dashboard({productStats,otherShipments}) {
               Created: 0,
             };
           }
+        
   
           // Increment the count based on the shipment's delivery status
           switch (shipment.delivery_status) {
@@ -269,6 +297,7 @@ function Dashboard({productStats,otherShipments}) {
   // };
 
   useEffect(() => {
+    fetchAllBack()
     setTimeout(() => setIsLoading(false), 500);
   }, [shipments]);
   

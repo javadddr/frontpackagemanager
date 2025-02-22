@@ -466,7 +466,7 @@ useEffect(() => {
   return (
     <HubsContext.Provider value={{ 
       hubs, products, vendors, customers, shipments, returnedCus, returnVen,totalReturn, backendShipments,backendShipments1,backendShipments2,shipped, otherShipments,orders,io, // Add customers here
-      fetchHubs, fetchProducts, fetchVendors, fetchCustomers,fetchShipments, fetchBackendShipments,fetchBackendShipments1,fetchBackendShipments2, fetchOrders, // Include fetchCustomers
+      fetchHubs, fetchProducts, fetchVendors, fetchCustomers,fetchShipments, fetchBackendShipments,fetchBackendShipments1,fetchBackendShipments2, fetchOrders,fetchAllBack, // Include fetchCustomers
       setHubs, setProducts, setVendors,setIo, setCustomers,setShipments, setBackendShipments, setBackendShipments1, setBackendShipments2, setOrders  // Include setCustomers
     }}>
       {children}

@@ -21,7 +21,12 @@ function Thirdsmall() {
       
       // Group shipments by week
       const weeklyData = returnedShipments.reduce((acc, item) => {
-        const date = moment(item.shipping_date);
+     
+        const date = moment(
+          item.shipping_date && moment(item.shipping_date).isValid() 
+            ? item.shipping_date 
+            : item.createdAtv2
+        );
         const week = date.format('DD MMM'); // Format to day and month abbreviation
         const weekStart = date.startOf('isoWeek').format('DD MMM'); // First day of the week
 

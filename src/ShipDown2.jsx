@@ -1,31 +1,30 @@
-import React, { useEffect,useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHubs } from "./HubsContext";
-import { Button,Chip } from "@nextui-org/react";
+import { Button, Chip } from "@nextui-org/react";
 import { Card, CardBody, CardFooter, Accordion, AccordionItem } from '@nextui-org/react';
-import { MapPin, Package, Truck, Calendar, Clock, User, Tag, DollarSign } from 'lucide-react'; // Changed to lucide-react
+import { MapPin, Package, Truck, Calendar, Clock, User, Tag, DollarSign } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { FaTruck, FaCheckCircle, FaClock } from 'react-icons/fa'; 
+import { FaTruck, FaCheckCircle, FaClock } from 'react-icons/fa';
 import { TbSquareArrowRight } from "react-icons/tb";
-import logo from "./dil.png"
-import logo1 from "./tran.png"
-import logo2 from "./cer.png"
+import logo from "./dil.png";
+import logo1 from "./tran.png";
+import logo2 from "./cer.png";
 import { Pagination } from "@nextui-org/react";
-import logo40 from "./pen.png"
-import logo3 from "./cancel.png"
+import logo40 from "./pen.png";
+import logo3 from "./cancel.png";
 import Loading from "./Loading";
-import { DatePicker, Space, theme,ConfigProvider } from 'antd';
-import {Input} from "@nextui-org/react";
-import {SearchIcon} from "./SearchIcon";
-import logo4 from "./noship.jpg"
+import { DatePicker, Space, theme, ConfigProvider } from 'antd';
+import { Input } from "@nextui-org/react";
+import { SearchIcon } from "./SearchIcon";
+import logo4 from "./noship.jpg";
 import { DeleteIcon } from "./DeleteIcon";
 import Calender from './component/Calenderi';
 import { EditIcon } from "./EditIcon";
-import {CheckboxGroup, Checkbox} from "@nextui-org/react";
+import { CheckboxGroup, Checkbox } from "@nextui-org/react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-function ShipDown2({shipments,returnVen,fetchShipments}) {
 
-
-  const { backendShipments2,fetchBackendShipments2 } = useHubs();
+function ShipDown2({ shipments, returnVen, fetchShipments }) {
+  const { backendShipments2, fetchBackendShipments2, io, fetchAllBack,vendors } = useHubs();
   const [checkedShipments, setCheckedShipments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -40,19 +39,18 @@ function ShipDown2({shipments,returnVen,fetchShipments}) {
       setCheckedShipments(validShipments);
     }
   }, [shipments, backendShipments2]);
-  const [selected, setSelected] = useState(["Transit", "Delivered","Exception", "Pending","Created"]);
+
+  const [selected, setSelected] = useState(["Transit", "Delivered", "Exception", "Pending", "Created"]);
   const [shippingDates, setShippingDates] = useState(new Set());
-  const [selectedRange, setSelectedRange] = useState(null); // State to hold selected range
-  const [filteredShipments, setFilteredShipments] = useState(checkedShipments);
-  const [finalShipments, setFinalShipments] = useState(filteredShipments);
+  const [selectedRange, setSelectedRange] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
-  const [deliveredCount, setDeliveredCount] = useState();
-  const [tranCount, settranCount] = useState();
-  const [exCount, setexCount] = useState();
-  const [creaCount, setcreaCount] = useState();
-  const [penCount, setpenCount] = useState();
-const [shipmentToDelete, setShipmentToDelete] = useState(null);
+  const [deliveredCount, setDeliveredCount] = useState(0);
+  const [tranCount, setTranCount] = useState(0);
+  const [exCount, setExCount] = useState(0);
+  const [creaCount, setCreaCount] = useState(0);
+  const [penCount, setPenCount] = useState(0);
+  const [shipmentToDelete, setShipmentToDelete] = useState(null);
   const { token } = theme.useToken();
   const style = {
     border: `2px solid ${token.colorPrimary}`,
@@ -61,209 +59,213 @@ const [shipmentToDelete, setShipmentToDelete] = useState(null);
     color: token.colorWhite
   };
 
+  const [finalShipments, setFinalShipments] = useState(
+    io.filter(shipment => shipment.where === "venReturn" || shipment.where === "venderSent")
+  );
+  
+  console.log("finalShipments",finalShipments)
+  const markAsSeen = async (shipmentId) => {
+    try {
+      const key = localStorage.getItem("key");
+      const backendUrl = import.meta.env.VITE_BACKEND_URL;
+      const response = await fetch(`${backendUrl}/api/venreturns/${shipmentId}/seen`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'key': key, // Your auth key
+        },
+        body: JSON.stringify({ seen: true }),
+      });
+  console.log("shipmentId",shipmentId)
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Tracking info updated:', data);
+        // Update local state optimistically
+        setFinalShipments(prev =>
+          prev.map(shipment =>
+            shipment._id === shipmentId ? { ...shipment, seen: true } : shipment
+          )
+        );
+        // Refresh backend data
+        fetchAllBack();
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to mark as seen:', errorData.message);
+      }
+    } catch (error) {
+      console.error('Error marking shipment as seen:', error);
+    }
+  };
   const capitalizeFirstLetter = (string) => {
     if (typeof string !== 'string') return string;
     return string.split(' ')
                  .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
                  .join(' ');
   };
+
   useEffect(() => {
     fetchShipments();
     fetchBackendShipments2();
   }, []);
+
   useEffect(() => {
-    // Filter shipments based on selected statuses
-    if (checkedShipments) {
-      const filtered = checkedShipments.filter(shipment => selected.includes(shipment.delivery_status));
-      setFilteredShipments(filtered);
+    let result = io.filter(shipment => 
+      (shipment.where === "venReturn" || shipment.where === "venderSent") &&
+      selected.includes(shipment.delivery_status || "Pending")
+    );
+
+    if (selectedRange && selectedRange.length === 2 && selectedRange[0] && selectedRange[1]) {
+      const [startDate, endDate] = selectedRange.map(dateString => new Date(dateString));
+      result = result.filter(shipment => {
+        if (!shipment.date && !shipment.shipping_date) return false;
+        const shippingDate = new Date(shipment.date || shipment.shipping_date);
+        return shippingDate >= startDate && shippingDate <= endDate;
+      });
     }
-  }, [checkedShipments, selected]);
 
+    if (searchTerm.length > 0) {
+      const searchTermLower = searchTerm.toLowerCase();
+      result = result.filter(shipment => {
+        const fields = [
+          shipment.trackingNumber?.toLowerCase() || shipment.tracking_number?.toLowerCase() || "",
+          shipment.courier?.toLowerCase() || shipment.courier_code?.toLowerCase() || "",
+          shipment.origin?.toLowerCase() || "",
+          shipment.shipping_info?.shipper_address?.city?.toLowerCase() || "",
+          shipment.shipping_info?.recipient_address?.city?.toLowerCase() || "",
+          shipment.delivery_status?.toLowerCase() || ""
+        ];
+        return fields.some(field => field.includes(searchTermLower));
+      });
+    }
 
+    setFinalShipments(result);
+
+    const deliveredCount = finalShipments.reduce((count, shipment) => {
+      return shipment.delivery_status === 'Delivered' ? count + 1 : count;
+    }, 0);
+    const tranCount = finalShipments.reduce((count, shipment) => {
+      return shipment.delivery_status === 'Transit' ? count + 1 : count;
+    }, 0);
+    const exCount = finalShipments.reduce((count, shipment) => {
+      return shipment.delivery_status === 'Exception' ? count + 1 : count;
+    }, 0);
+    const creaCount = finalShipments.reduce((count, shipment) => {
+      return shipment.delivery_status === 'Created' ? count + 1 : count;
+    }, 0);
+    const penCount = finalShipments.reduce((count, shipment) => {
+      return shipment.delivery_status === 'Pending' ? count + 1 : count;
+    }, 0);
+
+    setTranCount(tranCount);
+    setExCount(exCount);
+    setCreaCount(creaCount);
+    setPenCount(penCount);
+    setDeliveredCount(deliveredCount);
+  }, [io, selected, selectedRange, searchTerm,deliveredCount,tranCount,exCount,creaCount,penCount, returnVen]);
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
-///for calender 
-useEffect(() => {
-  if (filteredShipments && filteredShipments.length > 0) {
-    const dates = filteredShipments
-      .map(shipment => shipment.shipping_date ? new Date(shipment.shipping_date) : null)
-      .filter(date => date !== null);
-    setShippingDates(new Set(dates.map(date => 
-      `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
-    )));
-  }
-}, [filteredShipments,selectedRange]);
 
-const cellRender = (current, info) => {
-  if (info.type !== 'date') return info.originNode;
-  const dateString = `${current.year()}-${current.month() + 1}-${current.date()}`;
-  if (shippingDates.has(dateString)) {
+  useEffect(() => {
+    if (finalShipments && finalShipments.length > 0) {
+      const dates = finalShipments
+        .map(shipment => shipment.date || shipment.shipping_date ? new Date(shipment.date || shipment.shipping_date) : null)
+        .filter(date => date !== null);
+      setShippingDates(new Set(dates.map(date => 
+        `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+      )));
+    }
+  }, [finalShipments]);
+  useEffect(() => {
+    fetchAllBack()
+    setTimeout(() => setIsLoading(false), 500);
+  }, [shipments]);
+  const cellRender = (current, info) => {
+    if (info.type !== 'date') return info.originNode;
+    const dateString = `${current.year()}-${current.month() + 1}-${current.date()}`;
+    if (shippingDates.has(dateString)) {
+      return (
+        <div className="ant-picker-cell-inner" style={style}>
+          {current.date()}
+        </div>
+      );
+    }
     return (
-      <div className="ant-picker-cell-inner" style={style}>
+      <div className="ant-picker-cell-inner">
         {current.date()}
       </div>
     );
-  }
-  return (
-    <div className="ant-picker-cell-inner">
-      {current.date()}
-    </div>
-  );
-};
+  };
+  const getVendorNameByCustomerId = (customerId) => {
+    if (!customerId || !vendors || vendors.length === 0) return 'Unknown';
+    const matchingVendor = vendors.find(vendor => 
+      vendor._id.toString() === customerId.toString()
+    );
+    return matchingVendor ? matchingVendor.name : 'Unknown';
+  };
+  const handleDateChange = (dates, dateStrings) => {
+    setSelectedRange(dateStrings);
+  };
 
-const handleDateChange = (dates, dateStrings) => {
-  // `dates` is an array with two moment objects for the start and end date
-  // `dateStrings` is an array with two string representations of the dates
-  setSelectedRange(dateStrings);
+  const handleDelete = (shipment) => {
+    setShipmentToDelete(shipment);
+    onOpen();
+  };
 
-};
+  const confirmDelete = async () => {
+    const key = localStorage.getItem("key");
+    
+    if (shipmentToDelete) {
+      const requestOptions = {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'key': key
+        },
+        body: JSON.stringify({
+          tracking_number: shipmentToDelete.trackingNumber || shipmentToDelete.tracking_number,
+          courier_code: shipmentToDelete.courier || shipmentToDelete.courier_code
+        }),
+      };
 
-
-
-useEffect(() => {
-  if (selectedRange && filteredShipments.length > 0) {
-    // If selectedRange is empty or contains empty strings, show all filtered shipments
-    if (selectedRange.length === 2 && (selectedRange[0] === "" || selectedRange[1] === "")) {
-      setFinalShipments(filteredShipments);
-    } else {
-      const [startDate, endDate] = selectedRange.map(dateString => new Date(dateString));
-      
-      const finalShipments = filteredShipments.filter(shipment => {
-        if (!shipment.shipping_date) return false;
-        const shippingDate = new Date(shipment.shipping_date);
-        return shippingDate >= startDate && shippingDate <= endDate;
-      });
-
-      setFinalShipments(finalShipments);
-    }
-  } else {
-    // If no range is selected, show all filtered shipments
-    setFinalShipments(filteredShipments);
-  }
-}, [selectedRange, filteredShipments]);
-
-useEffect(() => {
-  if (searchTerm.length === 0) {
-    // If the search term is empty, show all final shipments
-    setFinalShipments(filteredShipments);
-  } else {
-    const searchTermLower = searchTerm.toLowerCase();
-    const searchedShipments = filteredShipments.filter(shipment => {
-      // Fields to search within
-      const fields = [
-        shipment.tracking_number.toLowerCase(), 
-        shipment.courier_code.toLowerCase(), 
-        shipment.origin ? shipment.origin.toLowerCase() : '', 
-        shipment.shipping_info?.shipper_address?.city ? shipment.shipping_info.shipper_address.city.toLowerCase() : '',
-        shipment.shipping_info?.recipient_address?.city ? shipment.shipping_info.recipient_address.city.toLowerCase() : '',
-        shipment.delivery_status.toLowerCase()
-      ];
-      // If any field matches the search term, include the shipment
-      return fields.some(field => field.includes(searchTermLower));
-    });
-    setFinalShipments(searchedShipments);
-  }
-  const deliveredCount = returnVen.reduce((count, shipment) => {
-    // Note: JavaScript is case-sensitive, so make sure the comparison matches exactly
-    if (shipment.delivery_status && shipment.delivery_status === 'Delivered') {
-      return count + 1;
-    }
-    return count;
-  }, 0);
-  const tranCount = returnVen.reduce((count, shipment) => {
-    // Note: JavaScript is case-sensitive, so make sure the comparison matches exactly
-    if (shipment.delivery_status && shipment.delivery_status === 'Transit') {
-      return count + 1;
-    }
-    return count;
-  }, 0);
-  const exCount = returnVen.reduce((count, shipment) => {
-    // Note: JavaScript is case-sensitive, so make sure the comparison matches exactly
-    if (shipment.delivery_status && shipment.delivery_status === 'Exception') {
-      return count + 1;
-    }
-    return count;
-  }, 0);
-  const creaCount = returnVen.reduce((count, shipment) => {
-    // Note: JavaScript is case-sensitive, so make sure the comparison matches exactly
-    if (shipment.delivery_status && shipment.delivery_status === 'Created') {
-      return count + 1;
-    }
-    return count;
-  }, 0);
-  const penCount = returnVen.reduce((count, shipment) => {
-    // Note: JavaScript is case-sensitive, so make sure the comparison matches exactly
-    if (shipment.delivery_status && shipment.delivery_status === 'Pending') {
-      return count + 1;
-    }
-    return count;
-  }, 0);
-
-  settranCount(tranCount)
-  setexCount(exCount)
-  setcreaCount(creaCount) 
-  setpenCount(penCount)
-  setDeliveredCount(deliveredCount)
-}, [searchTerm, filteredShipments]);
-const handleDelete = (shipment) => {
-  setShipmentToDelete(shipment);
-  onOpen();
-};
-const confirmDelete = async () => {
-  const key = localStorage.getItem("key");
-  
-  if (shipmentToDelete) {
-    const requestOptions = {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'key': key
-      },
-      body: JSON.stringify({
-        tracking_number: shipmentToDelete.tracking_number,
-        courier_code: shipmentToDelete.courier_code
-      }),
-    };
-
-    try {
-      const response = await fetch('https://api2.globalpackagetracker.com/shipment/archive', requestOptions);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Shipment archived successfully:', data);
-        // You might want to refresh your shipments list here
-        fetchShipments();
-      } else {
-        throw new Error('Failed to archive shipment');
+      try {
+        const response = await fetch('https://api2.globalpackagetracker.com/shipment/archive', requestOptions);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Shipment archived successfully:', data);
+          fetchShipments();
+        } else {
+          throw new Error('Failed to archive shipment');
+        }
+      } catch (error) {
+        console.error('Error archiving shipment:', error);
       }
-    } catch (error) {
-      console.error('Error archiving shipment:', error);
+
+      onClose();
     }
+  };
 
-    // Close the modal after the operation
-    onClose();
-  }
-};
+  useEffect(() => {
+    setTimeout(() => setIsLoading(false), 500);
+  }, [shipments]);
 
-useEffect(() => {
-  setTimeout(() => setIsLoading(false), 500);
-}, [shipments]);
-const handleEdit = (id) => {
-  // Logic to edit shipment with id
-  console.log("Editing shipment with id:", id);
-  // Implement actual edit logic or navigate to an edit page
-};
+  const handleEdit = (id) => {
+    console.log("Editing shipment with id:", id);
+    // Implement actual edit logic or navigate to an edit page
+  };
+
   return (
-    <div >
-    {isLoading ? (
-  <Loading />
-) : (
-  <>
+    <div>
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <>
        <div className='flex justify-between pt-4'>
          
         <div className="flex justify-center items-center ml-4">
@@ -348,7 +350,7 @@ const handleEdit = (id) => {
     
           </div>
         </div>
-        {returnVen.length>0 && <Calender otherShipments={returnVen}/>}
+        {returnVen.length > 0 && <Calender otherShipments={finalShipments} />}
         <div className="flex flex-col justify-center m-5 gap-4  justify-center items-center content-center  mb-0 mt-3">
         {finalShipments && finalShipments.length > 0 ? (
            <>
@@ -364,6 +366,23 @@ const handleEdit = (id) => {
             >
               <Card className='border border-gray-700 dark '>
               <CardBody className=''>
+              {shipment.seen === false && (
+  <div className="absolute top-2 right-2 flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 text-white px-3 -py-1.5 rounded-lg shadow-lg transition-all duration-300 hover:from-red-600 hover:to-red-700">
+    <span className="text-sm  tracking-tight">
+  
+   { getVendorNameByCustomerId(shipment.customerId)}
+    </span>
+    <Button
+      size="sm"
+      color="success"
+      variant="solid"
+      onClick={() => markAsSeen(shipment.trackingInfoId)}
+      className="bg-white text-red-600 font-semibold rounded-md px-2 py-0.5 hover:bg-gray-100 hover:text-red-700 transition-colors duration-200"
+    >
+      Mark as Seen 
+    </Button>
+  </div>
+)}
     <div className="grid grid-cols-[30%_30%_30%_10%] gap-4">
       <div>
         <h3 className=" flex items-center">
@@ -582,7 +601,7 @@ const handleEdit = (id) => {
       </ModalContent>
         </Modal>
         </>
-    )}
+      )}
     </div>
   );
 }

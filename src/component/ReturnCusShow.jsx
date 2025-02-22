@@ -102,7 +102,8 @@ useEffect(() => {
 
   // Check if PDF file path exists
   const pdfUrl = returnInfo && returnInfo.file && returnInfo.file.path ? `${backendUrl}/${returnInfo.file.path}` : null;
-
+console.log("vendorId",vendorId)
+console.log("owner",owner)
   const handleSubmit = async () => {
     if (!selectedCarrier || !trackingNumber) {
       setErrorMessage("Please select a carrier and enter a tracking number.");

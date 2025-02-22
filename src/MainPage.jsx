@@ -57,8 +57,10 @@ const MainPage = () => {
   }, []);
   const [collapsed, setCollapsed] = useState(false);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+ 
   const [selectedKey, setSelectedKey] = useState("1");
-  const { hubs, vendors,otherShipments, customers, products,shipments, backendShipments, backendShipments1, backendShipments2 } = useHubs();
+  const { hubs, vendors,otherShipments, customers, products,shipments, backendShipments, backendShipments1, backendShipments2,io } = useHubs();
+  const unseenCount = io.filter(shipment => shipment.seen === false).length;
   const [productStats, setProductStats] = useState({
     outgoing: {},
     incoming: {},
@@ -67,15 +69,55 @@ const MainPage = () => {
   const menuItems = [
     { label: "Dashboard", key: "1", icon: <PieChartOutlined style={{ fontSize: "26px" }} /> },
     { label: "Shipping", key: "2", icon: <LuPackageCheck style={{ fontSize: "26px" }} /> },
-   {
-    label: "Returns",
-    key: "3",
-    icon: <LuPackageX style={{ fontSize: "26px" }} />,
-    children: [
-      { label: "From Customer", key: "3-1" },
-      { label: "From Vendors", key: "3-2" },
-    ],
-  },
+    {
+      label: (
+        <span>
+          Returns{" "}
+          {unseenCount > 0 && (
+            <span
+              style={{
+                backgroundColor: "#ff4d4f",
+                color: "white",
+                borderRadius: "50%",
+                padding: "2px 6px",
+                fontSize: "14px",
+                marginLeft: "1px",
+                fontWeight:"bold"
+              }}
+            >
+              {unseenCount}
+            </span>
+          )}
+        </span>
+      ),
+      key: "3",
+      icon: <LuPackageX style={{ fontSize: "26px" }} />,
+      children: [
+        { label: "Customers", key: "3-1" },
+        {
+          label: (
+            <span>
+             Vendors{" "}
+              {unseenCount > 0 && (
+                <span
+                  style={{
+                    backgroundColor: "#ff4d4f",
+                    color: "white",
+                    borderRadius: "50%",
+                    padding: "2px 6px",
+                    fontSize: "14px",
+                    marginLeft: "8px",
+                  }}
+                >
+                  {unseenCount}
+                </span>
+              )}
+            </span>
+          ),
+          key: "3-2",
+        },
+      ],
+    },
     { label: "Inventory", key: "4", icon: <TbPackages style={{ fontSize: "26px" }} /> },
     { label: "Orders", key: "9", icon: <LiaFileInvoiceDollarSolid style={{ fontSize: "26px" }} /> },
     {
@@ -105,8 +147,8 @@ const MainPage = () => {
       },
       icon: <GrCapacity style={{ fontSize: "19px", height: "30px" }} />,
     },
-    { label: "Contact us", key: "7",style: { backgroundColor: "#09AACD",color:"black",fontSize:"14px" ,height:"25px",textAlign:"start"}, icon: <MdOutlineContactMail style={{ fontSize: "19px",height:"30px",marginRight:"2px" }} /> },
-    { label: "Log out", key: "8",style: { backgroundColor: "#936316",color:"black",fontSize:"14px" ,height:"25px",textAlign:"start"}, icon: <IoMdLogOut style={{ fontSize: "19px",height:"30px" }} /> },
+    { label: "Contact us", key: "7", style: { backgroundColor: "#09AACD", color: "black", fontSize: "14px", height: "25px", textAlign: "start" }, icon: <MdOutlineContactMail style={{ fontSize: "19px", height: "30px", marginRight: "2px" }} /> },
+    { label: "Log out", key: "8", style: { backgroundColor: "#936316", color: "black", fontSize: "14px", height: "25px", textAlign: "start" }, icon: <IoMdLogOut style={{ fontSize: "19px", height: "30px" }} /> },
   ];
   // Define getNameById as a standalone function
   const getNameById = (array, id) => {

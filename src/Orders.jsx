@@ -63,7 +63,7 @@ const handleCloseModal = () => {
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 const handleFormSubmit = async (values) => {
   setLoading(true);
-  
+
   try {
     // Check if orderId already exists
     if (orders.some(order => order.orderId === values.orderId)) {
@@ -73,17 +73,36 @@ const handleFormSubmit = async (values) => {
           errors: ['This Order ID already exists. Please use a different one.']
         }
       ]);
-      return; // Stop the form submission
+      return;
     }
-    
-    // Convert DatePicker values to string for API
+
+    // Safely format dates, default to null if not provided
     values.orderDate = values.orderDate ? values.orderDate.format("DD.MM.YYYY") : null;
     values.fulfillmentTime = values.fulfillmentTime ? values.fulfillmentTime.format("DD.MM.YYYY") : null;
 
-    // Parse the quantity string
+    // Validate and parse quantity
+    if (!values.quantity || typeof values.quantity !== 'string') {
+      form.setFields([
+        {
+          name: 'quantity',
+          errors: ['Please enter quantities separated by "-".']
+        }
+      ]);
+      return;
+    }
     const quantities = values.quantity.split('-').map(Number);
-    
-    // Ensure the number of quantities matches the number of items selected
+
+    // Ensure items is an array and matches quantities
+    if (!values.items || !Array.isArray(values.items) || values.items.length === 0) {
+      form.setFields([
+        {
+          name: 'items',
+          errors: ['Please select at least one item.']
+        }
+      ]);
+      return;
+    }
+
     if (quantities.length !== values.items.length) {
       form.setFields([
         {
@@ -94,40 +113,51 @@ const handleFormSubmit = async (values) => {
       return;
     }
 
-    // Format items for backend submission with correct quantities
-    const itemsForBackend = values.items.map((item, index) => ({
-      item: item.itemId,
-      quantity: quantities[index] || 1, // Use 1 as default if quantity can't be parsed
-      shipped: item.shipped || 0
+    // Format items for backend
+    const itemsForBackend = values.items.map((itemId, index) => ({
+      item: itemId, // itemId is the product _id from Select
+      quantity: quantities[index] || 1,
+      shipped: 0 // Default shipped to 0
     }));
 
     // Get owner from localStorage
     const owner = localStorage.getItem("key");
+
+    // Prepare payload
+    const payload = {
+      ...values,
+      items: itemsForBackend,
+      owner,
+      customer: values.customer // Ensure customer is included
+    };
 
     // Make API call to create order
     const response = await fetch(`${backendUrl}/api/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-owner': owner 
+        'x-owner': owner
       },
-      body: JSON.stringify({ ...values, items: itemsForBackend, owner })
+      body: JSON.stringify(payload)
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.message || 'Failed to create order');
     }
 
-    // Update local state with form values and server response
     setFormValues(values);
-    setSuccess(true); // Mark form submission as successful
-
+    setSuccess(true);
     await fetchOrders();
   } catch (error) {
     console.error("Error creating order:", error);
-    // Here you might want to show an error to the user or handle it appropriately
+    form.setFields([
+      {
+        name: 'orderId',
+        errors: [error.message || 'Failed to create order. Please try again.']
+      }
+    ]);
   } finally {
     setLoading(false);
   }
@@ -314,7 +344,7 @@ const handleFormSubmit = async (values) => {
     style={{ marginBottom: 8 }}
   >
     <DatePicker 
-       style={{ width: '85%',marginLeft:"54px" }}
+       style={{ width: '83%',marginLeft:"64px" }}
       format="DD.MM.YYYY"
     />
   </Form.Item>
@@ -364,19 +394,13 @@ const handleFormSubmit = async (values) => {
         filterOption={(input, option) => 
           option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
         }
-        onChange={(_, selectedOptions) => {
-          form.setFieldsValue({
-            items: selectedOptions.map(option => ({
-              itemId: option.value, // Use the value as item ID
-              quantity: 1, // Default quantity to 1
-              shipped: 0 // Default shipped to 0
-            }))
-          });
+        onChange={(value) => {
+          form.setFieldsValue({ items: value }); // Directly set array of _ids
         }}
       >
         {products.map((product) => (
           <Option key={product._id} value={product._id}>
-            {`${product.name}-Left ${product.currentInventory}`}
+            {`${product.name} - Left ${product.currentInventory}`}
           </Option>
         ))}
       </Select>
@@ -385,7 +409,6 @@ const handleFormSubmit = async (values) => {
     <Spin />
   )}
 </Form.Item>
-
 
 
 

@@ -23,7 +23,11 @@ function Seconsmall() {
       
       // Group shipments by week using shipping_date
       const weeklyData = shippedShipments.reduce((acc, item) => {
-        const date = moment(item.shipping_date); // Changed to shipping_date
+        const date = moment(
+          item.shipping_date && moment(item.shipping_date).isValid() 
+            ? item.shipping_date 
+            : item.createdAtv2
+        );
         const weekStart = date.startOf('isoWeek').format('DD MMM'); // Start of the week in 'DD MMM' format
 
         if (!acc[weekStart]) {

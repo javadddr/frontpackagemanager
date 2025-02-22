@@ -26,7 +26,7 @@ import Map from './Map';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 function ShipDown({shipments,shipped,otherShipments, fetchShipments,backendShipments, showcal = true}) {
 
-  const { customers,vendors,hubs,fetchBackendShipments,orders} = useHubs();
+  const { customers,vendors,hubs,fetchBackendShipments,orders,io} = useHubs();
 
   const [checkedShipments, setCheckedShipments] = useState([]);
 
@@ -48,7 +48,10 @@ function ShipDown({shipments,shipped,otherShipments, fetchShipments,backendShipm
   const [selected, setSelected] = useState(["Transit", "Delivered","Exception", "Pending", "Created"]);
   const [shippingDates, setShippingDates] = useState(new Set());
   const [selectedRange, setSelectedRange] = useState(null); // State to hold selected range
-  const [filteredShipments, setFilteredShipments] = useState(otherShipments);
+
+  const [filteredShipments, setFilteredShipments] = useState(
+    io.filter(shipment => shipment.status === "shipped")
+  );
   const [finalShipments, setFinalShipments] = useState(filteredShipments);
   const [totali, setTotali] = useState();
   const [deliveredCount, setDeliveredCount] = useState();
@@ -135,7 +138,7 @@ const handleDateChange = (dates, dateStrings) => {
 
 
 useEffect(() => {
-  let tempShipments = otherShipments ? checkedShipments.filter(shipment => 
+  let tempShipments = filteredShipments ? checkedShipments.filter(shipment => 
     selected.includes(shipment.delivery_status)) : [];
 
   // Apply date range filtering if a range is selected
@@ -211,7 +214,7 @@ useEffect(() => {
     setShippingDates(new Set());
   }
 
-}, [checkedShipments, selected, selectedRange, searchTerm, orders, backendShipments]);
+}, [checkedShipments, selected, selectedRange, searchTerm, orders,deliveredCount,tranCount,exCount,creaCount,penCount, backendShipments]);
 
 
 
@@ -516,7 +519,7 @@ const [selectedHub, setSelectedHub] = useState('');
    
          </div>
       </div>
-     {otherShipments.length>0 && <Calender otherShipments={otherShipments}/>}
+     {otherShipments.length>0 && <Calender otherShipments={filteredShipments}/>}
       <div className="flex flex-col justify-center m-5 gap-4  justify-center items-center content-center  mb-0 mt-3">
         {finalShipments && finalShipments.length > 0 ? (
            <>
