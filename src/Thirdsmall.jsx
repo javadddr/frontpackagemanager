@@ -9,7 +9,7 @@ import { XAxis } from "recharts";
 import moment from 'moment';
 import { IoSquareSharp } from 'react-icons/io5';
 
-function Thirdsmall() {
+function Thirdsmall({isDark}) {
   const { io } = useHubs();
   const [weeklyShipments1, setWeeklyShipments1] = useState([]);
   const [returned, setReturned] = useState(0); // Changed to number for count
@@ -57,7 +57,7 @@ function Thirdsmall() {
   };
 
   return (
-    <Card className="dark">
+    <Card className={` ${isDark?"dark":""}`}>
       <CardHeader>
         <CardTitle>
           <div className='flex justify-between'>
@@ -66,7 +66,7 @@ function Thirdsmall() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Info size={17} className="inline text-gray-100 cursor-pointer" />
+                    <Info size={14} className={`inline ${isDark?"text-gray-100":"text-gray-900"}  cursor-pointer`} />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Total Returns (Past 3 months-weekly)</p>

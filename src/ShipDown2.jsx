@@ -59,11 +59,24 @@ function ShipDown2({ shipments, returnVen, fetchShipments }) {
     color: token.colorWhite
   };
 
-  const [finalShipments, setFinalShipments] = useState(
-    io.filter(shipment => shipment.where === "venReturn" || shipment.where === "venderSent")
-  );
+ 
+
+  const [filteredShipments, setFilteredShipments] = useState([]); // Start with empty array
+
+  // Add a useEffect to update filteredShipments when io changes
+  useEffect(() => {
+    console.log("io data:", io);
+    const filtered = io.filter(shipment => 
+      (shipment.where === "venReturn" || shipment.where === "venderSent") &&
+      shipment.courier_code && shipment.courier_code.trim() !== ""
+    );
+    console.log("filtered shipments:", filtered);
+    setFilteredShipments(filtered);
+  }, [io]);
   
-  console.log("finalShipments",finalShipments)
+  // Update finalShipments to use filteredShipments instead of io directly
+  const [finalShipments, setFinalShipments] = useState([]);
+  console.log("filteredShipmentsdown2",filteredShipments)
   const markAsSeen = async (shipmentId) => {
     try {
       const key = localStorage.getItem("key");
@@ -76,10 +89,10 @@ function ShipDown2({ shipments, returnVen, fetchShipments }) {
         },
         body: JSON.stringify({ seen: true }),
       });
-  console.log("shipmentId",shipmentId)
+
       if (response.ok) {
         const data = await response.json();
-        console.log('Tracking info updated:', data);
+      
         // Update local state optimistically
         setFinalShipments(prev =>
           prev.map(shipment =>
@@ -109,11 +122,10 @@ function ShipDown2({ shipments, returnVen, fetchShipments }) {
   }, []);
 
   useEffect(() => {
-    let result = io.filter(shipment => 
-      (shipment.where === "venReturn" || shipment.where === "venderSent") &&
+    let result = filteredShipments.filter(shipment => 
       selected.includes(shipment.delivery_status || "Pending")
     );
-
+  
     if (selectedRange && selectedRange.length === 2 && selectedRange[0] && selectedRange[1]) {
       const [startDate, endDate] = selectedRange.map(dateString => new Date(dateString));
       result = result.filter(shipment => {
@@ -122,7 +134,7 @@ function ShipDown2({ shipments, returnVen, fetchShipments }) {
         return shippingDate >= startDate && shippingDate <= endDate;
       });
     }
-
+  
     if (searchTerm.length > 0) {
       const searchTermLower = searchTerm.toLowerCase();
       result = result.filter(shipment => {
@@ -137,32 +149,38 @@ function ShipDown2({ shipments, returnVen, fetchShipments }) {
         return fields.some(field => field.includes(searchTermLower));
       });
     }
+  
+    // Filter out shipments without a courier_code
+    result = result.filter(shipment => 
+      shipment.courier_code && shipment.courier_code.trim() !== ""
+    );
+
+  
 
     setFinalShipments(result);
-
-    const deliveredCount = finalShipments.reduce((count, shipment) => {
+  
+    const deliveredCount = result.reduce((count, shipment) => {
       return shipment.delivery_status === 'Delivered' ? count + 1 : count;
     }, 0);
-    const tranCount = finalShipments.reduce((count, shipment) => {
+    const tranCount = result.reduce((count, shipment) => {
       return shipment.delivery_status === 'Transit' ? count + 1 : count;
     }, 0);
-    const exCount = finalShipments.reduce((count, shipment) => {
+    const exCount = result.reduce((count, shipment) => {
       return shipment.delivery_status === 'Exception' ? count + 1 : count;
     }, 0);
-    const creaCount = finalShipments.reduce((count, shipment) => {
+    const creaCount = result.reduce((count, shipment) => {
       return shipment.delivery_status === 'Created' ? count + 1 : count;
     }, 0);
-    const penCount = finalShipments.reduce((count, shipment) => {
+    const penCount = result.reduce((count, shipment) => {
       return shipment.delivery_status === 'Pending' ? count + 1 : count;
     }, 0);
-
+  
     setTranCount(tranCount);
     setExCount(exCount);
     setCreaCount(creaCount);
     setPenCount(penCount);
     setDeliveredCount(deliveredCount);
-  }, [io, selected, selectedRange, searchTerm,deliveredCount,tranCount,exCount,creaCount,penCount, returnVen]);
-
+  }, [filteredShipments, selected, selectedRange, searchTerm]); // Update dependencies
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
@@ -214,14 +232,24 @@ function ShipDown2({ shipments, returnVen, fetchShipments }) {
   };
 
   const handleDelete = (shipment) => {
+   
     setShipmentToDelete(shipment);
     onOpen();
   };
 
   const confirmDelete = async () => {
     const key = localStorage.getItem("key");
-    
+
     if (shipmentToDelete) {
+      // Ensure both tracking_number and courier_code are present
+      const trackingNumber = shipmentToDelete.trackingNumber || shipmentToDelete.tracking_number;
+      const courierCode = shipmentToDelete.courier || shipmentToDelete.courier_code || "unknown"; // Fallback if missing
+  
+      if (!trackingNumber || !courierCode) {
+        console.error("Missing required fields for deletion:", { trackingNumber, courierCode });
+        return; // Exit early if critical data is missing
+      }
+  
       const requestOptions = {
         method: 'PATCH',
         headers: {
@@ -229,36 +257,50 @@ function ShipDown2({ shipments, returnVen, fetchShipments }) {
           'key': key
         },
         body: JSON.stringify({
-          tracking_number: shipmentToDelete.trackingNumber || shipmentToDelete.tracking_number,
-          courier_code: shipmentToDelete.courier || shipmentToDelete.courier_code
+          tracking_number: trackingNumber,
+          courier_code: courierCode
         }),
       };
+  
 
+  
       try {
         const response = await fetch('https://api2.globalpackagetracker.com/shipment/archive', requestOptions);
         if (response.ok) {
           const data = await response.json();
-          console.log('Shipment archived successfully:', data);
-          fetchShipments();
+        
+          fetchShipments(); // Refresh shipments after successful deletion
+          fetchAllBack(); // Refresh backend data if needed
+          setFinalShipments(prev => prev.filter(s => 
+            (s.trackingNumber || s.tracking_number) !== trackingNumber
+          )); // Optimistically update UI
         } else {
-          throw new Error('Failed to archive shipment');
+          const errorData = await response.json();
+          throw new Error(`Failed to archive shipment: ${errorData.message || response.statusText}`);
         }
       } catch (error) {
         console.error('Error archiving shipment:', error);
       }
-
-      onClose();
+  
+      onClose(); // Close the modal regardless of success/failure
     }
   };
 
   useEffect(() => {
     setTimeout(() => setIsLoading(false), 500);
   }, [shipments]);
+  useEffect(() => {
+    if (filteredShipments && filteredShipments.length > 0) {
+      const dates = filteredShipments
+        .map(shipment => shipment.shipping_date ? new Date(shipment.shipping_date) : null)
+        .filter(date => date !== null);
+      setShippingDates(new Set(dates.map(date => 
+        `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+      )));
+    }
+  }, [filteredShipments,selectedRange]);
 
-  const handleEdit = (id) => {
-    console.log("Editing shipment with id:", id);
-    // Implement actual edit logic or navigate to an edit page
-  };
+ 
 
   return (
     <div>
@@ -350,7 +392,7 @@ function ShipDown2({ shipments, returnVen, fetchShipments }) {
     
           </div>
         </div>
-        {returnVen.length > 0 && <Calender otherShipments={finalShipments} />}
+        {filteredShipments.length > 0 && <Calender otherShipments={filteredShipments} />}
         <div className="flex flex-col justify-center m-5 gap-4  justify-center items-center content-center  mb-0 mt-3">
         {finalShipments && finalShipments.length > 0 ? (
            <>
@@ -583,7 +625,7 @@ function ShipDown2({ shipments, returnVen, fetchShipments }) {
       </div>
         )}
         </div>
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <Modal isOpen={isOpen} onOpenChange={onOpenChange} className='dark'>
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">Confirm Deletion</ModalHeader>
         <ModalBody>

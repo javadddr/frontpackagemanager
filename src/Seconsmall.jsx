@@ -9,7 +9,7 @@ import { XAxis } from "recharts";
 import moment from 'moment';
 import { IoSquareSharp } from 'react-icons/io5';
 
-function Seconsmall() {
+function Seconsmall({isDark}) {
   const { io } = useHubs();
   const [chartData1, setChartData1] = useState([]);
   const [shipped, setShipped] = useState([]);
@@ -57,7 +57,7 @@ function Seconsmall() {
   };
 
   return (
-    <Card className="dark">
+    <Card className={` ${isDark?"dark":""}`}>
       <CardHeader>
         <CardTitle>
           <div className='flex justify-between'>
@@ -66,7 +66,7 @@ function Seconsmall() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Info size={17} className="inline text-gray-100 cursor-pointer" />
+                  <Info size={14} className={`inline ${isDark?"text-gray-100":"text-gray-900"}  cursor-pointer`} />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Shipments that have been sent out (Past 3 months-weekly)</p>

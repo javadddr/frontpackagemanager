@@ -47,6 +47,7 @@ function ShipDown1({shipments,returnedCus,fetchShipments}) {
   const [filteredShipments, setFilteredShipments] = useState(
     io.filter(shipment => shipment.status === "cusReturn")
   );
+  console.log("filteredShipmentsdown1",filteredShipments)
   const [finalShipments, setFinalShipments] = useState(filteredShipments);
   const [searchTerm, setSearchTerm] = useState('');
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
@@ -569,7 +570,7 @@ const handleEdit = (id) => {
       </div>
         )}
         </div>
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <Modal isOpen={isOpen} onOpenChange={onOpenChange} className='dark'>
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">Confirm Deletion</ModalHeader>
         <ModalBody>

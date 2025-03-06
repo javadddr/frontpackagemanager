@@ -47,7 +47,7 @@ const ChartConfig = {
   },
 };
 
-export default function TwoBar() {
+export default function TwoBar({ isDark}) {
   const { io } = useHubs();
   const [chartDatashipped1, setChartDatashipped1] = useState([]);
   const [chartDataReturn1, setChartDataReturn1] = useState([]);
@@ -103,7 +103,7 @@ export default function TwoBar() {
   }, [chartDatashipped1, chartDataReturn1]);
 
   return (
-    <Card className="dark">
+    <Card className={`${isDark?"dark":"light"} `}>
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row h-[100px]">
         <div className="flex flex-1 flex-col justify-center gap-1 px-0 py-0 sm:py-0">
           <CardTitle>Delivery Status vs date for {activeChart === "shipped" ? "shipped packages" : "returned packages"}</CardTitle>
@@ -116,10 +116,10 @@ export default function TwoBar() {
             <button
               key={key}
               data-active={activeChart === key}
-              className="relative z-30 flex flex-1 h-[60px] flex-col justify-center gap-1 border-t px-3 py-4 p-3 rounded text-center even:border-l data-[active=true]:bg-lime-700 sm:border sm:border-t-1 sm:px-4 sm:py-1"
+              className={`relative z-30 flex flex-1 h-[60px] flex-col justify-center gap-1 border-t px-3 py-4 p-3 rounded text-center even:border-l ${isDark?"text-white":"text-black"} text-black data-[active=true]:bg-lime-700 data-[active=true]:text-white sm:border sm:border-t-1 sm:px-4 sm:py-1`}
               onClick={() => setActiveChart(key)}
             >
-              <span className="text-xs text-white">
+              <span className="text-xs  ">
                 {key.charAt(0).toUpperCase() + key.slice(1)}
               </span>
               <span className="text-lg font-bold leading-none sm:text-xl">

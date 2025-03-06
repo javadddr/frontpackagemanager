@@ -18,7 +18,7 @@ import {
   ChartTooltipContent,
 } from "./ui/chart";
 
-function PieCharto() {
+function PieCharto({isDark}) {
   const { shipments } = useHubs();
 
   // Count shipments by delivery status
@@ -75,7 +75,7 @@ function PieCharto() {
   }, [chartData]);
 
   return (
-    <Card className="flex flex-col dark ">
+    <Card className={`flex flex-col ${isDark?"dark":"light"} `}>
       <CardHeader className="items-center pb-2">
         <CardTitle>Delivery Status </CardTitle>
         <CardDescription>Showing Shipments by Status</CardDescription>

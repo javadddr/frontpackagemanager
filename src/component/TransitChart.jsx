@@ -35,7 +35,7 @@ const chartConfig = {
 };
 
 
-export default function TransitChart() {
+export default function TransitChart({isDark}) {
   const [timeRange, setTimeRange] = useState("90d");
   const { shipments, backendShipments,hubs,vendors,products, backendShipments1, backendShipments2 } = useHubs();
 
@@ -142,7 +142,7 @@ const filteredData = chartData.filter((item) => {
 });
 
   return (
-    <Card className="dark">
+    <Card className={`${isDark?"dark":"light"}`}>
    <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
   <div className="grid flex-1 gap-1 text-center sm:text-left">
     <CardTitle>Transit Time (Days)</CardTitle>

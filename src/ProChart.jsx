@@ -16,7 +16,7 @@ import {
 import { useHubs } from "./HubsContext";
 import { IoSquareSharp } from "react-icons/io5";
 
-export default function ProChart() {
+export default function ProChart({isDark}) {
   const { products } = useHubs();
 
   const chartData = products.length === 0 ? [] : products.map((product) => ({
@@ -41,7 +41,7 @@ export default function ProChart() {
   };
 
   return (
-    <Card className="mt-10 mr-3 h-[300px] w-[400px] dark">
+    <Card className={`mt-10 mr-3 h-[300px] w-[400px] ${isDark?"dark":"light"}`}>
       <CardHeader>
         <CardTitle>Inventory Levels</CardTitle>
         <CardDescription>

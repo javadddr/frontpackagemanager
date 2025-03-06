@@ -14,7 +14,7 @@ import {
 } from "./component/ui/chart";
 import { useHubs } from "./HubsContext";
 import { IoSquareSharp } from "react-icons/io5";
-function ProChange() {
+function ProChange({isDark}) {
   const { products } = useHubs();
   const [chartData, setChartData] = useState([]);
 
@@ -78,7 +78,8 @@ const chartConfig = {
 };
 
   return (
-    <Card className="mt-10 mr-3 h-[300px] w-[400px] dark">
+
+      <Card className={`mt-10 mr-3 h-[300px] w-[400px] ${isDark?"dark":"light"}`}>
       <CardHeader>
         <CardTitle>Product Inventory Changes</CardTitle>
         <CardDescription>Showing inventory movements</CardDescription>

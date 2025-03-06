@@ -8,7 +8,7 @@ import { BarChart, Bar } from "recharts";
 import { XAxis } from "recharts";
 import { IoSquareSharp } from 'react-icons/io5';
 
-function ForthSmal() {
+function ForthSmal({isDark}) {
   const { io } = useHubs();
   const [chartData, setChartData] = useState([]);
 
@@ -62,7 +62,7 @@ function ForthSmal() {
   };
 
   return (
-    <Card className="dark">
+    <Card className={` ${isDark?"dark":""}`}>
       <CardHeader>
         <CardTitle>
           <div className='flex justify-between'>
@@ -71,7 +71,7 @@ function ForthSmal() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Info size={17} className="inline text-gray-100 cursor-pointer" />
+                  <Info size={14} className={`inline ${isDark?"text-gray-100":"text-gray-900"}  cursor-pointer`} />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Comparison of Shipped and Returned Shipments for the Last 7 Days</p>

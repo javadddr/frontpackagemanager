@@ -20,7 +20,7 @@ import ProChange from "./ProChange";
 import ProHub from "./ProHub";
 import Seconsmall from './Seconsmall';
 import Thirdsmall from './Thirdsmall';
-function Dashboard({productStats,otherShipments}) {
+function Dashboard({isDark,otherShipments}) {
 
  
   const { shipments,io, backendShipments, backendShipments1,totalReturn,fetchShipments,shipped,returnedCus,returnVen, backendShipments2,fetchAllBack } = useHubs();
@@ -410,13 +410,13 @@ function Dashboard({productStats,otherShipments}) {
 
 
   return (
-    <div className='flex flex-col bg-zinc-900'>
+    <div className={`flex flex-col ${isDark?"bg-zinc-900":"bg-white"}`}>
     {isLoading ? (
   <Loading />
 ) : (
-    <div className='flex flex-col bg-zinc-900'>
+    <div className={`flex flex-col ${isDark?"bg-zinc-900":"bg-white"}`}>
       <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-      <Card className="dark">
+      <Card className={` ${isDark?"dark":""}`}>
     <CardHeader>
       <CardTitle>
         <div className='flex justify-between'>
@@ -503,31 +503,31 @@ function Dashboard({productStats,otherShipments}) {
       </CardContent>
     </Card>
 
-    <Seconsmall/>
+    <Seconsmall isDark={isDark} />
 
-    <Thirdsmall/>
+    <Thirdsmall isDark={isDark}/>
 
-    <ForthSmal/>
+    <ForthSmal isDark={isDark}/>
       </div>
-      <Calendari2 otherShipments2={otherShipments} shipments={shipments} returnedCus={returnedCus} returnVen={returnVen}/>
+      <Calendari2 otherShipments2={otherShipments} shipments={shipments} returnedCus={returnedCus} returnVen={returnVen} isDark={isDark}/>
       <div>
           <div className='flex w-[98%]  ml-4 '>
             <div className='w-[30%] '>
-            <PieCharto/>
+            <PieCharto isDark={isDark}/>
             </div>
             <div className='w-[70%] ml-4'>
-            <TwoBar chartDatashipped={chartDatashipped}  chartDataReturn={chartDatashipped1}/>
+            <TwoBar chartDatashipped={chartDatashipped}  chartDataReturn={chartDatashipped1}  isDark={isDark}/>
             </div>
             </div>
       </div>
       <div className=' w-[98%] ml-4 mt-4'>
-        <TransitChart/>
+        <TransitChart isDark={isDark}/>
       </div>
 
-      <div className="flex justify-center  w-[98%]  ml-4 mt-4">
-<ProChart/>
-<ProChange/>
-<ProHub/>
+      <div className="flex justify-center  w-[98%]  ml-4 mt-4 mb-10">
+<ProChart isDark={isDark}/>
+<ProChange isDark={isDark}/>
+<ProHub isDark={isDark}/>
 </div>
       {/* <Thirdsmall/> */}
    

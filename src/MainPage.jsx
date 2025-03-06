@@ -4,7 +4,9 @@ import { TbPackages } from "react-icons/tb";
 import { GrMapLocation } from "react-icons/gr";
 import Loading from "./Loading";
 import logocompany  from "./dynamologo1.png"
+import logocompany1 from "./dynamologo.png"; // Adjust the path as needed
 import { IoMdLogOut } from "react-icons/io";
+import Nav from "./Nav";
 import { GrCapacity } from "react-icons/gr";
 import Orders from "./Orders";
 import { LiaFileInvoiceDollarSolid } from "react-icons/lia";
@@ -45,6 +47,25 @@ import TestForm from "../Tesform";
 const MainPage = () => {
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [isDark, setIsDark] = useState(() => {
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme ? savedTheme === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", isDark);
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  }, [isDark]);
+
+  const handleThemeSwitch = () => {
+    setIsDark((prev) => !prev);
+  };
+
+
+
+
+
   useEffect(() => {
     setTimeout(() => setIsLoading(false), 500);
   }, []);
@@ -130,25 +151,7 @@ const MainPage = () => {
         { label: "Customers", key: "5-3" },
       ],
     },
-    {
-      label: (
-        <span style={{ lineHeight: "0" }}>
-          <span className="pl-1 text-base">{userData?.capacity || 0}: </span> Purchase Capacity
-        </span>
-      ),
-      key: "6",
-      style: {
-        backgroundColor: "#12A150",
-        color: "black",
-        fontSize: "14px",
-        marginTop: "280px",
-        height: "25px",
-        textAlign: "start",
-      },
-      icon: <GrCapacity style={{ fontSize: "19px", height: "30px" }} />,
-    },
-    { label: "Contact us", key: "7", style: { backgroundColor: "#09AACD", color: "black", fontSize: "14px", height: "25px", textAlign: "start" }, icon: <MdOutlineContactMail style={{ fontSize: "19px", height: "30px", marginRight: "2px" }} /> },
-    { label: "Log out", key: "8", style: { backgroundColor: "#936316", color: "black", fontSize: "14px", height: "25px", textAlign: "start" }, icon: <IoMdLogOut style={{ fontSize: "19px", height: "30px" }} /> },
+
   ];
   // Define getNameById as a standalone function
   const getNameById = (array, id) => {
@@ -283,7 +286,7 @@ useEffect(() => {
   const renderContent = () => {
     switch (selectedKey) {
       case "1":
-        return <Dashboard productStats={productStats} otherShipments={otherShipments}/>;
+        return <Dashboard productStats={productStats} otherShipments={otherShipments} isDark={isDark}/>;
       case "2":
         return <Ship />;
       case "3-1":
@@ -308,141 +311,157 @@ useEffect(() => {
 
 
   return (
-    <div className='flex flex-col bg-zinc-900'>
-    {isLoading ? (
-  <Loading />
-) : (
-    <Layout theme="dark" style={{ minHeight: "100vh"}}>
-    <Sider
-  theme="dark"
-  collapsible
-  collapsed={collapsed}
-  style={fixedSiderStyle}
-  onCollapse={setCollapsed}
-  className="shadow-2xl"
->
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      height: "100%",
-    }}
-  >
-    {/* Menu Section */}
-    <div style={{ flexGrow: 1 }}>
-      <div
-        style={{
-          height: 0,
-          margin: 16,
-          background: "rgba(255, 255, 255, 0.3)",
-        }}
-      />
-      <div
-      style={{
-        height: collapsed ? "64px" : "70px",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: collapsed ? "6px 10px" : "4px 10px",
-      }}
-    >
-      <a
-        href="https://dynamopackage.com"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <img
-          className="mb-4"
-          src={logocompany}
-          alt="Company Logo"
-          style={{
-            height: "100%",
-            maxWidth: collapsed ? "90%" : "60%",
-            objectFit: "contain",
-            transition: "all 0.3s",
-            marginLeft: collapsed ? "0" : "40px",
-          }}
-        />
-      </a>
+    <div className={`flex flex-col ${isDark?"bg-zinc-900":"bg-zinc-100"} `}>
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <Layout style={{ minHeight: "100vh" }}>
+          {/* Replace Header with Nav */}
+          <Nav userData={userData} isDark={isDark} setIsDark={setIsDark} handleThemeSwitch={handleThemeSwitch}/>
+  
+          <Layout>
+            <Sider
+              theme={isDark?"dark":"light"}
+              collapsible
+              collapsed={collapsed}
+              style={fixedSiderStyle}
+              onCollapse={setCollapsed}
+              className="shadow-2xl"
+            >
+              {/* Sider content remains unchanged */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "100%",
+                }}
+              >
+                <div style={{ flexGrow: 1 }}>
+                  <div
+                    style={{
+                      height: 0,
+                      margin: 16,
+                      background: "rgba(255, 255, 255, 0.3)",
+                    }}
+                  />
+                  <div
+                    style={{
+                      height: collapsed ? "64px" : "70px",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      padding: collapsed ? "6px 10px" : "4px 10px",
+                    }}
+                  >
+                    <a
+                      href="https://dynamopackage.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        className="mb-4"
+                        src={isDark?logocompany:logocompany1}
+                        alt="Company Logo"
+                        style={{
+                          height: "100%",
+                          maxWidth: collapsed ? "90%" : "60%",
+                          objectFit: "contain",
+                          transition: "all 0.3s",
+                          marginLeft: collapsed ? "0" : "40px",
+                        }}
+                      />
+                    </a>
+                  </div>
+                  <Menu
+                    theme={isDark?"dark":"light"}
+                    defaultSelectedKeys={["1"]}
+                    mode="inline"
+                    items={menuItems}
+                    onClick={handleMenuClick}
+                    style={{ fontFamily: "Arial, sans-serif", fontSize: "17px" }}
+                  />
+                </div>
+  
+                {shipments?.length === 0 && (
+                  <div
+                    className="bg-yellow-700 rounded-lg p-2 text-black font-bold hover:cursor-pointer"
+                    style={{
+                      position: "fixed",
+                      bottom: "300px",
+                      left: "6px",
+                      fontSize: "11.8px",
+                    }}
+                    onClick={onOpen}
+                  >
+                    Quick Start Guide: How to <br /> Begin with Dynamo Package!
+                  </div>
+                )}
+  
+                <Modal isOpen={isOpen} onOpenChange={onOpenChange} className="dark" size="4xl">
+                  <ModalContent>
+                    {(onClose) => (
+                      <>
+                        <ModalHeader className="flex flex-col gap-1">
+                          Quick Start Guide
+                        </ModalHeader>
+                        <ModalBody>
+                          <iframe
+                            width="100%"
+                            height="400"
+                            src="https://www.youtube.com/embed/rNToLmmxmsQ"
+                            title="Track and monitor all of your packages from +2100 carriers worldwide in one place"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            allowFullScreen
+                          ></iframe>
+                        </ModalBody>
+                        <ModalFooter>
+                          <Button color="danger" variant="light" onPress={onClose}>
+                            Close
+                          </Button>
+                        </ModalFooter>
+                      </>
+                    )}
+                  </ModalContent>
+                </Modal>
+              </div>
+            </Sider>
+  
+            <Layout>
+              <Content
+                style={{
+                  margin: "0 0px",
+                  paddingTop: "0px",
+                  minHeight: "90vh",
+                  marginLeft: `${collapsed ? "80px" : "200px"}`,
+                }}
+              >
+                <div
+                  style={{
+                    padding: 0,
+                    minHeight: "90vh",
+                    background: colorBgContainer,
+                    borderRadius: borderRadiusLG,
+                  }}
+                >
+                  {renderContent()}
+                </div>
+              </Content>
+              <Footer
+                className={`${isDark?"bg-zinc-900":""} ml-[10%]  ${isDark?"text-white":"text-black"} `}
+                style={{
+                  textAlign: "center",
+                  marginLeft: `${collapsed ? "80px" : "200px"}`,
+                }}
+              >
+                Dynamo Package ©{new Date().getFullYear()} Created by DyamoChart
+              </Footer>
+            </Layout>
+          </Layout>
+        </Layout>
+      )}
     </div>
-      <Menu
-        theme="dark"
-        defaultSelectedKeys={["1"]}
-        mode="inline"
-        items={menuItems}
-        onClick={handleMenuClick}
-        style={{ fontFamily: "Arial, sans-serif", fontSize: "17px" }}
-      />
-    </div>
-
- { shipments?.length===0 &&  <div
-        className="bg-yellow-700 rounded-lg p-2 text-black font-bold hover:cursor-pointer"
-        style={{
-          position: "fixed",
-          bottom: "300px",
-          left: "6px",
-          fontSize: "11.8px",
-        }}
-        onClick={onOpen}
-      >
-        Quick Start Guide: How to <br /> Begin with Dynamo Package!
-      </div>}
-
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange} className="dark" size="4xl">
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                Quick Start Guide
-              </ModalHeader>
-              <ModalBody>
-                <iframe
-                  width="100%"
-                  height="400"
-                  src="https://www.youtube.com/embed/rNToLmmxmsQ"
-                  title="Track and monitor all of your packages from +2100 carriers worldwide in one place"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allowFullScreen
-                ></iframe>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
-                  Close
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-    
-  </div>
-</Sider>
-      <Layout>
-        <Content  style={{ margin: "0 0px",paddingTop:"0px" }} >
-          
-          <div
-            style={{
-              padding: 0,
-              minHeight: "90vh",
-              background: colorBgContainer,
-              borderRadius: borderRadiusLG,
-         
-              marginLeft:`${collapsed?"80px":"200px"}`
-            }}
-          >
-            {renderContent()}
-          </div>
-        </Content>
-        <Footer className="bg-zinc-900 ml-[10%] text-white" style={{ textAlign: "center",  marginLeft:`${collapsed?"80px":"200px"}` }}>
-          Dynamo Package ©{new Date().getFullYear()} Created by DyamoChart
-       
-        </Footer>
-      </Layout>
-    </Layout>
-     )}
-     </div>
   );
 };
 
