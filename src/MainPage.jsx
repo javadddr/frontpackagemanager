@@ -288,7 +288,7 @@ useEffect(() => {
       case "1":
         return <Dashboard productStats={productStats} otherShipments={otherShipments} isDark={isDark}/>;
       case "2":
-        return <Ship />;
+        return <Ship isDark={isDark}/>;
       case "3-1":
         return <CusReturn/>;
         case "3-2":

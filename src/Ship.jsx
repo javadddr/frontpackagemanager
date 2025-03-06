@@ -13,7 +13,7 @@ import { CheckCircleOutlined ,CloseCircleTwoTone} from '@ant-design/icons';
 
 import { AiOutlineCloseCircle } from "react-icons/ai";
 
-function Ship() {
+function Ship({isDark}) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [open, setOpen] = React.useState(false);
   const [placement, setPlacement] = React.useState();
@@ -72,7 +72,7 @@ function Ship() {
   }, [open, progress, messages]);
 
   return (
-    <div className="pt-6 bg-zinc-900" style={{ minHeight: "100vh"}}>
+    <div className={`pt-6 ${isDark?"bg-zinc-900":"bg-white"} `} style={{ minHeight: "100vh"}}>
       {/* Trigger Button */}
       <div className="flex justify-end mr-5">
       <MotionButton
@@ -191,7 +191,7 @@ function Ship() {
         </Drawer.Body>
       </Drawer>
       </div>
-       <ShipDown shipped={shipped} otherShipments={otherShipments} shipments={shipments} backendShipments={backendShipments} fetchShipments={fetchShipments} />
+       <ShipDown isDark={isDark} shipped={shipped} otherShipments={otherShipments} shipments={shipments} backendShipments={backendShipments} fetchShipments={fetchShipments} />
     </div>
   );
 }

@@ -24,7 +24,7 @@ import {CheckboxGroup, Checkbox} from "@nextui-org/react";
 import Calender from './component/Calenderi';
 import Map from './Map';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-function ShipDown({shipments,shipped,otherShipments, fetchShipments,backendShipments, showcal = true}) {
+function ShipDown({shipments,isDark,shipped,otherShipments, fetchShipments,backendShipments, showcal = true}) {
 
   const { customers,vendors,hubs,fetchBackendShipments,orders,io} = useHubs();
 
@@ -427,9 +427,9 @@ const [selectedHub, setSelectedHub] = useState('');
     {isLoading ? (
   <Loading />
 ) : (
-  <div className=''>
-  
-      <div className='flex justify-between pt-4 '>
+ 
+   <div className={`${isDark?"bg-zinc-900":"bg-white"}`}>
+      <div className='flex justify-center pt-4  pr-16 pl-16'>
            
           <div className="flex justify-center items-center ml-4">
             
@@ -440,7 +440,7 @@ const [selectedHub, setSelectedHub] = useState('');
             color="secondary"
             value={selected}
             onValueChange={setSelected}
-            className='dark' 
+            className={`${isDark?"dark":"light"}`} 
          
           >
           
@@ -463,7 +463,7 @@ const [selectedHub, setSelectedHub] = useState('');
   
 
         // Alias Token
-        colorBgContainer: '#18181B',
+        colorBgContainer:isDark? '#18181B':"",
       },
     }}
   >
@@ -478,48 +478,53 @@ const [selectedHub, setSelectedHub] = useState('');
             </ConfigProvider>
             </div>
           </div>
-          <div className='mr-4 '> 
-
-      <Input
-        isClearable
-        radius="lg"
-      
-        style={{color:"white"}}
-        classNames={{
-          label: "text-black/50 dark:text-white/90 ",
-          input: [
-            "bg-gray-800",
-            "text-base", // Changed to white and larger text
-        "flex",
-          ],
-          innerWrapper: "bg-transparent",
-          inputWrapper: [
-            "shadow-md",
-            "bg-default-800/50",
-            "dark:bg-default/60",
-            "backdrop-blur-xl",
-            "backdrop-saturate-200",
-            
-            "group-data-[focus=true]:bg-default-600/50",
-            "dark:group-data-[focus=true]:bg-default/60",
-            "group-data-[hover=true]:bg-default-600/50",
-            "dark:group-data-[hover=true]:bg-default/60",
-            "!cursor-text",
-            "max-w-[240px]",
-          ],
-        }}
-        placeholder="Type to search..."
-        onClear={() => setSearchTerm('')} 
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        startContent={
-          <SearchIcon className="w-5 h-5 text-white pointer-events-none flex-shrink-0" />
-        }
-      />
-   
-         </div>
+          <div className="mr-4 ml-4 max-h-[32px]">
+            <Input
+              isClearable
+              radius="lg"
+              style={{ color: isDark ? "white" : "black" }}
+              classNames={{
+                label: "text-white/90 dark:text-black/90 h-[32px]", // Adjusted to match height
+                input: [
+                  "bg-gray-800",
+                  "text-sm", // Reduced from text-base to ensure text fits (16px -> 14px)
+                  "flex",
+                  "h-[32px]", // Keep input height
+                  "leading-[28px]", // Slightly less than height to allow space and prevent overlap
+                  "py-0", // No vertical padding
+                ],
+                innerWrapper: "bg-transparent h-[32px] py-0 flex items-center", // Center content vertically
+                inputWrapper: [
+                  "shadow-sm",
+                  "bg-default-200/50",
+                  "dark:bg-default/60",
+                  "backdrop-blur-xl",
+                  "backdrop-saturate-200",
+                  "group-data-[focus=true]:bg-default-200/50",
+                  "dark:group-data-[focus=true]:bg-default/60",
+                  "group-data-[hover=true]:bg-default-400/50",
+                  "dark:group-data-[hover=true]:bg-default/60",
+                  "!cursor-text",
+                  "max-w-[300px]",
+                  "h-[32px]", // Wrapper height
+                  "min-h-[32px]", // Minimum height
+                  "py-0", // No padding
+                  "flex items-center", // Ensure vertical centering
+                ],
+              }}
+              placeholder="Type to search..."
+              onClear={() => setSearchTerm("")}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              startContent={
+                <SearchIcon
+                  className={`w-3 h-3 ${isDark ? "text-white" : "text-black"} pointer-events-none flex-shrink-0`}
+                />
+              }
+            />
+          </div>
       </div>
-     {otherShipments.length>0 && <Calender otherShipments={filteredShipments}/>}
+     {otherShipments.length>0 && <Calender isDark={isDark} otherShipments={filteredShipments}/>}
       <div className="flex flex-col justify-center m-5 gap-4  justify-center items-center content-center  mb-0 mt-3">
         {finalShipments && finalShipments.length > 0 ? (
            <>
@@ -533,7 +538,7 @@ const [selectedHub, setSelectedHub] = useState('');
               transition={{ delay: index * 0.1 }}
               className="w-full"
             >
-              <Card className='border border-gray-700 dark '>
+              <Card className={` ${isDark?"border border-gray-700 dark":"border border-gray-700 light"}  `}>
               <CardBody className='dark'>
     <div className="grid grid-cols-[20%_20%_20%_25%_5%] gap-5">
       <div>

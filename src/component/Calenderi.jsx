@@ -24,7 +24,7 @@ import { EditIcon } from "../EditIcon";
 import { Pagination } from "@nextui-org/react";
 
 
-function Calendari({otherShipments}) {
+function Calendari({otherShipments,isDark}) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const { fetchShipments,shipments,backendShipments,setShipments,setBackendShipments,fetchBackendShipments,fetchBackendShipments1,fetchBackendShipments2 } = useHubs();
   const [sortedShipments, setSortedShipments] = useState({});
@@ -169,16 +169,16 @@ const determineCellColor = (day) => {
 };
 
   return (
-    <div className="p-3 m-20 mb-0 mt-3 border rounded-lg border-slate-800 shadow-xl flex flex-col justify-center">
+    <div className={`mt-4 ${isDark? "p-3 m-5 mb-0 mt-0 mb-4 border rounded-lg border-slate-800  flex flex-col justify-center bg-zinc-950":"p-3 m-5 mb-0 mt-0 mb-4 border rounded-lg border-slate-200  flex flex-col justify-center bg-zinc-50"}`}>
       <div className="flex justify-between items-center mb-4">
         <button 
           onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))} 
           className="p-2  text-white rounded-lg"
         >
-          <CgArrowLeftO className="text-black w-8 h-8 text-gray-100" />
+                   <CgArrowLeftO className={`text-black w-8 h-8 ${isDark?"text-gray-100":"text-gray-900"} `} />
         </button>
      
-        <h2 className="text-lg font-bold ml-40 pl-40 text-gray-100">{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h2>
+        <h2 className={`text-lg font-bold ml-40 pl-40 ${isDark?"text-gray-100":"text-gray-900"} `}>{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h2>
         <div className='flex justify-center items-center'>
         <div className="">
         <ConfigProvider
@@ -204,7 +204,7 @@ const determineCellColor = (day) => {
           onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))} 
           className="p-2  text-white rounded-lg"
         >
-          <CgArrowRightO className="text-black w-8 h-8 text-gray-100" />
+                    <CgArrowRightO className={`text-black w-8 h-8 ${isDark?"text-gray-100":"text-gray-900"} `} />
         </button>
         </div>
       </div>
@@ -216,7 +216,7 @@ const determineCellColor = (day) => {
           <div 
             key={index} 
             onClick={() => handleDayClick(day)}
-            className={`flex  justify-center  border border-neutral-800 items-center rounded-md h-16 text-xs cursor-pointer ${day ? '' : 'text-gray-100'} 
+            className={`flex  justify-center  border ${isDark?"border-neutral-800":"border-neutral-200"}  items-center rounded-md h-16 text-xs cursor-pointer ${day ? '' : 'text-gray-100'} 
             ${day ? determineCellColor(day) : ''}`}
           >
             {day ? (
