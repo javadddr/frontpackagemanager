@@ -178,7 +178,7 @@ const determineCellColor = (day) => {
                    <CgArrowLeftO className={`text-black w-8 h-8 ${isDark?"text-gray-100":"text-gray-900"} `} />
         </button>
      
-        <h2 className={`text-lg font-bold ml-40 pl-40 ${isDark?"text-gray-100":"text-gray-900"} `}>{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h2>
+        <h2 className={`text-lg font-bold ml-40 pl-0 ${isDark?"text-gray-100":"text-gray-900"} `}>{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h2>
         <div className='flex justify-center items-center'>
         <div className="">
         <ConfigProvider

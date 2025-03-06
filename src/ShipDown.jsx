@@ -538,7 +538,7 @@ const [selectedHub, setSelectedHub] = useState('');
               transition={{ delay: index * 0.1 }}
               className="w-full"
             >
-              <Card className={` ${isDark?"border border-gray-700 dark":"border border-gray-700 light"}  `}>
+              <Card className={` ${isDark?"border border-gray-700 dark":"border border-gray-300 light"}  `}>
               <CardBody className='dark'>
     <div className="grid grid-cols-[20%_20%_20%_25%_5%] gap-5">
       <div>
@@ -621,7 +621,7 @@ const [selectedHub, setSelectedHub] = useState('');
                   <Accordion isCompact  >
                   <AccordionItem
                       aria-label="Travel History"
-                      title={<span className="font-light text-sm text-lime-100 hover:cursor-pointer">Click here to see the travel history</span>} 
+                      title={<span className={`font-light text-sm ${isDark?"text-lime-100":"text-lime-900"}  hover:cursor-pointer`}>Click here to see the travel history</span>} 
                 
                       className="  border-1 border-slate-700 pl-2 text-sm rounded-lg shadow-md  "
                     >
@@ -735,7 +735,7 @@ const [selectedHub, setSelectedHub] = useState('');
           aria-label="Edit"
           onClick={() => handleEdit(shipment)}
         >
-          <EditIcon className="w-6 h-6"/>
+          <EditIcon className="w-5 h-5"/>
         </Button>
         {/* <Button 
           isIconOnly 
