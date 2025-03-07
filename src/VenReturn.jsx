@@ -13,7 +13,7 @@ import { CheckCircleOutlined ,CloseCircleTwoTone} from '@ant-design/icons';
 
 import { AiOutlineCloseCircle } from "react-icons/ai";
 
-function VenReturn() {
+function VenReturn({isDark}) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [trackingNumbers, setTrackingNumbers] = useState([]);
   const handleOpenModal = () => setModalOpen(true);
@@ -52,7 +52,7 @@ function VenReturn() {
 
 
   return (
-    <div className="pt-6 bg-zinc-900" style={{ minHeight: "100vh"}}>
+    <div className={`pt-6 ${isDark?"bg-zinc-900":"bg-white"} `} style={{ minHeight: "100vh"}}>
       {/* Trigger Button */}
       <div className="flex justify-end mr-5">
       <MotionButton
@@ -179,7 +179,7 @@ function VenReturn() {
 
         </Drawer.Body>
       </Drawer>
-  <ShipDown2 shipments={shipments} returnVen={returnVen} fetchShipments={fetchShipments}/>
+  <ShipDown2 isDark={isDark} shipments={shipments} returnVen={returnVen} fetchShipments={fetchShipments}/>
     </div>
   );
 }

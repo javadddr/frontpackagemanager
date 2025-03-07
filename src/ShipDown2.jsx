@@ -23,7 +23,7 @@ import { EditIcon } from "./EditIcon";
 import { CheckboxGroup, Checkbox } from "@nextui-org/react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
 
-function ShipDown2({ shipments, returnVen, fetchShipments }) {
+function ShipDown2({ shipments,isDark, returnVen, fetchShipments }) {
   const { backendShipments2, fetchBackendShipments2, io, fetchAllBack,vendors } = useHubs();
   const [checkedShipments, setCheckedShipments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -308,9 +308,11 @@ function ShipDown2({ shipments, returnVen, fetchShipments }) {
         <Loading />
       ) : (
         <>
-       <div className='flex justify-between pt-4'>
-         
-        <div className="flex justify-center items-center ml-4">
+           <div className={`${isDark?"bg-zinc-900":"bg-white"}`}>
+      <div className='flex justify-center pt-4  pr-16 pl-16'>
+           
+          <div className="flex justify-center items-center ml-4">
+            
               
               <div className='flex mb-3'>
               <CheckboxGroup
@@ -319,7 +321,7 @@ function ShipDown2({ shipments, returnVen, fetchShipments }) {
               color="secondary"
               value={selected}
               onValueChange={setSelected}
-              className='dark' 
+              className={`${isDark?"dark":"light"}`} 
             >
             
             <Checkbox value="Transit" style={{color:"blue"}}>In Transit<Chip color='primary' variant='flat' size="sm" className='ml-1'>{tranCount}</Chip></Checkbox>
@@ -341,7 +343,7 @@ function ShipDown2({ shipments, returnVen, fetchShipments }) {
   
 
         // Alias Token
-        colorBgContainer: '#18181B',
+        colorBgContainer:isDark? '#18181B':"",
       },
     }}
   >
@@ -355,44 +357,54 @@ function ShipDown2({ shipments, returnVen, fetchShipments }) {
               </ConfigProvider>
               </div>
             </div>
-            <div className='mr-4'> 
+            <div className="mr-4 ml-4 max-h-[32px]">
             <Input
-        isClearable
-        radius="lg"
-        classNames={{
-          label: "text-black/50 dark:text-white/90 ",
-          input: [
-            "bg-gray",
-            "text-black/90 dark:text-white/90",
-            "placeholder:text-default-50/50 dark:placeholder:text-white/90",
-          ],
-          innerWrapper: "bg-transparent",
-          inputWrapper: [
-            "shadow-md",
-            "bg-default-800/50",
-            "dark:bg-default/60",
-            "backdrop-blur-xl",
-            "backdrop-saturate-200",
-        
-            "group-data-[focus=true]:bg-default-200/50",
-            "dark:group-data-[focus=true]:bg-default/60",
-            "group-data-[hover=true]:bg-default-200/50",
-            "dark:group-data-[hover=true]:bg-default/60",
-            "!cursor-text",
-          ],
-        }}
-          placeholder="Type to search..."
-          onClear={() => setSearchTerm('')} 
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          startContent={
-            <SearchIcon className="text-black/50 mb-0.5 dark:text-white/90 text-slate-400 pointer-events-none flex-shrink-0" />
-          }
-        />
-    
+              isClearable
+              radius="lg"
+              style={{ color: isDark ? "white" : "black" }}
+              classNames={{
+                label: "text-white/90 dark:text-black/90 h-[32px]", // Adjusted to match height
+                input: [
+                  "bg-gray-800",
+                  "text-sm", // Reduced from text-base to ensure text fits (16px -> 14px)
+                  "flex",
+                  "h-[32px]", // Keep input height
+                  "leading-[28px]", // Slightly less than height to allow space and prevent overlap
+                  "py-0", // No vertical padding
+                ],
+                innerWrapper: "bg-transparent h-[32px] py-0 flex items-center", // Center content vertically
+                inputWrapper: [
+                  "shadow-sm",
+                  "bg-default-200/50",
+                  "dark:bg-default/60",
+                  "backdrop-blur-xl",
+                  "backdrop-saturate-200",
+                  "group-data-[focus=true]:bg-default-200/50",
+                  "dark:group-data-[focus=true]:bg-default/60",
+                  "group-data-[hover=true]:bg-default-400/50",
+                  "dark:group-data-[hover=true]:bg-default/60",
+                  "!cursor-text",
+                  "max-w-[300px]",
+                  "h-[32px]", // Wrapper height
+                  "min-h-[32px]", // Minimum height
+                  "py-0", // No padding
+                  "flex items-center", // Ensure vertical centering
+                ],
+              }}
+              placeholder="Type to search..."
+              onClear={() => setSearchTerm("")}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              startContent={
+                <SearchIcon
+                  className={`w-3 h-3 ${isDark ? "text-white" : "text-black"} pointer-events-none flex-shrink-0`}
+                />
+              }
+            />
+          </div>
           </div>
         </div>
-        {filteredShipments.length > 0 && <Calender otherShipments={filteredShipments} />}
+        {filteredShipments.length > 0 && <Calender isDark={isDark} otherShipments={filteredShipments} />}
         <div className="flex flex-col justify-center m-5 gap-4  justify-center items-center content-center  mb-0 mt-3">
         {finalShipments && finalShipments.length > 0 ? (
            <>
@@ -406,7 +418,7 @@ function ShipDown2({ shipments, returnVen, fetchShipments }) {
               transition={{ delay: index * 0.1 }}
               className="w-full"
             >
-              <Card className='border border-gray-700 dark '>
+               <Card className={` ${isDark?"border border-gray-700 dark":"border border-gray-300 light"}  `}>
               <CardBody className=''>
               {shipment.seen === false && (
   <div className="absolute top-2 right-2 flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 text-white px-3 -py-1.5 rounded-lg shadow-lg transition-all duration-300 hover:from-red-600 hover:to-red-700">
@@ -488,7 +500,7 @@ function ShipDown2({ shipments, returnVen, fetchShipments }) {
                   <Accordion isCompact  >
                   <AccordionItem
                       aria-label="Travel History"
-                      title={<span className="font-light text-sm text-lime-100 hover:cursor-pointer">Click here to see the travel history</span>} 
+                      title={<span className={`font-light text-sm ${isDark?"text-lime-100":"text-lime-900"}  hover:cursor-pointer`}>Click here to see the travel history</span>} 
                 
                       className=" border-1 border-slate-400 pl-2 text-sm rounded-lg shadow-md  "
                     >

@@ -13,7 +13,7 @@ import { CheckCircleOutlined ,CloseCircleTwoTone} from '@ant-design/icons';
 
 import { AiOutlineCloseCircle } from "react-icons/ai";
 
-function CusReturn() {
+function CusReturn({isDark}) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [trackingNumbers, setTrackingNumbers] = useState([]);
   const handleOpenModal = () => setModalOpen(true);
@@ -56,7 +56,7 @@ function CusReturn() {
 
 
   return (
-    <div className="pt-6 bg-zinc-900" style={{ minHeight: "100vh"}}>
+    <div className={`pt-6 ${isDark?"bg-zinc-900":"bg-white"} `} style={{ minHeight: "100vh"}}>
       {/* Trigger Button */}
       <div className="flex justify-end mr-5">
       <MotionButton
@@ -176,7 +176,7 @@ function CusReturn() {
 
 
 
-  <ShipDown1 returnedCus={returnedCus} shipments={shipments} fetchShipments={fetchShipments}/>
+  <ShipDown1 isDark={isDark} returnedCus={returnedCus} shipments={shipments} fetchShipments={fetchShipments}/>
     </div>
   );
 }

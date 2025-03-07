@@ -290,21 +290,21 @@ useEffect(() => {
       case "2":
         return <Ship isDark={isDark}/>;
       case "3-1":
-        return <CusReturn/>;
+        return <CusReturn isDark={isDark}/>;
         case "3-2":
-        return <VenReturn/>;Orders
+        return <VenReturn isDark={isDark}/>;Orders
       case "4":
-        return <Inventory productStats={productStats}/>;
+        return <Inventory productStats={productStats} isDark={isDark}/>;
       case "9":
-          return <Orders/>;
+          return <Orders isDark={isDark}/>;
       case "5-1":
-        return <Hubs />;
+        return <Hubs isDark={isDark}/>;
       case "5-2":
-        return <Vendors />;
+        return <Vendors isDark={isDark}/>;
       case "5-3":
-        return <Customers />;
+        return <Customers isDark={isDark}/>;
       default:
-        return <Dashboard productStats={productStats} otherShipments={otherShipments}/>;
+        return <Dashboard productStats={productStats} otherShipments={otherShipments} isDark={isDark}/>;
     }
   };
 

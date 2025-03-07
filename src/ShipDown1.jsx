@@ -22,7 +22,7 @@ import { EditIcon } from "./EditIcon";
 import Calender from './component/Calenderi';
 import {CheckboxGroup, Checkbox} from "@nextui-org/react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
-function ShipDown1({shipments,returnedCus,fetchShipments}) {
+function ShipDown1({shipments,isDark,returnedCus,fetchShipments}) {
 
 
   const { backendShipments1,fetchBackendShipments1,io } = useHubs();
@@ -267,10 +267,11 @@ const handleEdit = (id) => {
   <Loading />
 ) : (
   <>
-        <div className='flex justify-between pt-4'>
-          
-        <div className="flex justify-center items-center ml-4">
-              
+       <div className={`${isDark?"bg-zinc-900":"bg-white"}`}>
+      <div className='flex justify-center pt-4  pr-16 pl-16'>
+           
+          <div className="flex justify-center items-center ml-4">
+            
               <div className='flex mb-3'>
               <CheckboxGroup
           size="md"
@@ -278,7 +279,7 @@ const handleEdit = (id) => {
               color="secondary"
               value={selected}
               onValueChange={setSelected}
-              className='dark'
+              className={`${isDark?"dark":"light"}`} 
             >
             
             <Checkbox value="Transit" style={{color:"blue"}}>In Transit<Chip color='primary' variant='flat' size="sm" className='ml-1'>{tranCount}</Chip></Checkbox>
@@ -300,7 +301,7 @@ const handleEdit = (id) => {
   
 
         // Alias Token
-        colorBgContainer: '#18181B',
+        colorBgContainer:isDark? '#18181B':"",
       },
     }}
   >
@@ -314,47 +315,54 @@ const handleEdit = (id) => {
               </ConfigProvider>
               </div>
             </div>
-            <div className='mr-4'> 
+            <div className="mr-4 ml-4 max-h-[32px]">
             <Input
-        isClearable
-        radius="lg"
-        style={{color:"white"}}
-        classNames={{
-          label: "text-black/50 dark:text-white/90 ",
-          input: [
-            "bg-gray-800",
-            "text-base", // Changed to white and larger text
-        "flex",
-          ],
-          innerWrapper: "bg-transparent",
-          inputWrapper: [
-            "shadow-md",
-      "bg-default-800/50",
-      "dark:bg-default/60",
-      "backdrop-blur-xl",
-      "backdrop-saturate-200",
-      
-      "group-data-[focus=true]:bg-default-600/50",
-      "dark:group-data-[focus=true]:bg-default/60",
-      "group-data-[hover=true]:bg-default-600/50",
-      "dark:group-data-[hover=true]:bg-default/60",
-      "!cursor-text",
-      "max-w-[240px]",
-          ],
-        }}
-          placeholder="Type to search..."
-          onClear={() => setSearchTerm('')} 
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          startContent={
-            <SearchIcon className="w-5 h-5 text-white pointer-events-none flex-shrink-0" />
-          }
-        />
-    
+              isClearable
+              radius="lg"
+              style={{ color: isDark ? "white" : "black" }}
+              classNames={{
+                label: "text-white/90 dark:text-black/90 h-[32px]", // Adjusted to match height
+                input: [
+                  "bg-gray-800",
+                  "text-sm", // Reduced from text-base to ensure text fits (16px -> 14px)
+                  "flex",
+                  "h-[32px]", // Keep input height
+                  "leading-[28px]", // Slightly less than height to allow space and prevent overlap
+                  "py-0", // No vertical padding
+                ],
+                innerWrapper: "bg-transparent h-[32px] py-0 flex items-center", // Center content vertically
+                inputWrapper: [
+                  "shadow-sm",
+                  "bg-default-200/50",
+                  "dark:bg-default/60",
+                  "backdrop-blur-xl",
+                  "backdrop-saturate-200",
+                  "group-data-[focus=true]:bg-default-200/50",
+                  "dark:group-data-[focus=true]:bg-default/60",
+                  "group-data-[hover=true]:bg-default-400/50",
+                  "dark:group-data-[hover=true]:bg-default/60",
+                  "!cursor-text",
+                  "max-w-[300px]",
+                  "h-[32px]", // Wrapper height
+                  "min-h-[32px]", // Minimum height
+                  "py-0", // No padding
+                  "flex items-center", // Ensure vertical centering
+                ],
+              }}
+              placeholder="Type to search..."
+              onClear={() => setSearchTerm("")}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              startContent={
+                <SearchIcon
+                  className={`w-3 h-3 ${isDark ? "text-white" : "text-black"} pointer-events-none flex-shrink-0`}
+                />
+              }
+            />
           </div>
-        </div>
-    
-        {returnedCus.length>0 && <Calender otherShipments={filteredShipments}/>}
+      </div>
+      </div>
+        {returnedCus.length>0 && <Calender isDark={isDark} otherShipments={filteredShipments}/>}
         <div className="flex flex-col justify-center m-5 gap-4  justify-center items-center content-center  mb-0 mt-3">
         {finalShipments && finalShipments.length > 0 ? (
            <>
@@ -368,7 +376,7 @@ const handleEdit = (id) => {
               transition={{ delay: index * 0.1 }}
               className="w-full"
             >
-              <Card className='border border-gray-700 dark '>
+             <Card className={` ${isDark?"border border-gray-700 dark":"border border-gray-300 light"}  `}>
               <CardBody className='dark'>
     <div className="grid grid-cols-[30%_30%_30%_10%] gap-4">
       <div>
@@ -433,7 +441,7 @@ const handleEdit = (id) => {
                   <Accordion isCompact  >
                   <AccordionItem
                       aria-label="Travel History"
-                      title={<span className="font-light text-sm text-lime-100 hover:cursor-pointer">Click here to see the travel history</span>} 
+                      title={<span className={`font-light text-sm ${isDark?"text-lime-100":"text-lime-900"}  hover:cursor-pointer`}>Click here to see the travel history</span>} 
                 
                       className="border-1 border-slate-700 pl-2 text-sm rounded-lg shadow-md  "
                     >
@@ -570,7 +578,7 @@ const handleEdit = (id) => {
       </div>
         )}
         </div>
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} className='dark'>
+        <Modal isOpen={isOpen} onOpenChange={onOpenChange} className={`${isDark?"dark ":"light text-gray-900"}`}>
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">Confirm Deletion</ModalHeader>
         <ModalBody>

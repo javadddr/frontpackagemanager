@@ -769,7 +769,7 @@ const [selectedHub, setSelectedHub] = useState('');
       </div>
         )}
       </div>
-      <Modal isOpen={isDeleteOpen} onOpenChange={onDeleteOpenChange} className='dark'>
+      <Modal isOpen={isDeleteOpen} onOpenChange={onDeleteOpenChange} className={`${isDark?"dark ":"light text-gray-900"}`}>
     <ModalContent>
       <ModalHeader className="flex flex-col gap-1">Confirm Deletion</ModalHeader>
       <ModalBody>
@@ -786,43 +786,43 @@ const [selectedHub, setSelectedHub] = useState('');
       </ModalFooter>
     </ModalContent>
       </Modal>
-      <Modal isOpen={isMapOpen} onOpenChange={onMapOpenChange} size="xl" className='dark'>
+      <Modal isOpen={isMapOpen} onOpenChange={onMapOpenChange} size="xl" className={`${isDark?"dark ":"light text-gray-900"}`}>
         <ModalContent>
           <ModalHeader className="flex flex-col gap-1">Shipment Details</ModalHeader>
           <ModalBody>
             {selectedShipment && (
               <>
                 <p><strong>Tracking Number:</strong> {selectedShipment.tracking_numbers[0].trackingNumber}</p>
-                <div className="flex items-center mb-2">
+                <div className="flex justify-between items-center mb-2 w-[300px]">
                   <strong>Hub:</strong>
                   <select 
-                    className="ml-2 p-1 bg-gray-700 text-white rounded"
+                    className={`ml-2 p-1 w-[200px] ${isDark?"bg-gray-700 text-white":"bg-gray-100 text-black"} shadow-md  rounded-xl `}
                     value={selectedHub}
                     onChange={(e) => setSelectedHub(e.target.value)}
                   >
-                    <option value="">{selectedHub || 'Not specified'}</option>
+                   <option value="">Not specified</option>
                     {hubs.map(hub => (
                       <option key={hub._id} value={hub._id}>{hub.name}</option>
                     ))}
                   </select>
                 </div>
-                <div className="flex items-center mb-2">
+                <div className="flex justify-between items-center mb-2 w-[300px]">
                   <strong>Vendor:</strong>
                   <select 
-                    className="ml-2 p-1 bg-gray-700 text-white rounded"
+                    className={`ml-2 p-1 w-[200px] ${isDark?"bg-gray-700 text-white":"bg-gray-100 text-black"} shadow-md  rounded-xl `}
                     value={selectedVendor}
                     onChange={(e) => setSelectedVendor(e.target.value)}
                   >
-                    <option value="">{selectedVendor || 'Not specified'}</option>
+                    <option value="">Not specified</option>
                     {vendors.map(vendor => (
                       <option key={vendor._id} value={vendor._id}>{vendor.name}</option>
                     ))}
                   </select>
                 </div>
-                <div className="flex items-center mb-2">
+                <div className="flex justify-between items-center mb-2 w-[300px]">
                   <strong>Customer:</strong>
                   <select 
-                    className="ml-2 p-1 bg-gray-700 text-white rounded"
+                    className={`ml-2 p-1 w-[200px] ${isDark?"bg-gray-700 text-white":"bg-gray-100 text-black"} shadow-md  rounded-xl `}
                     value={selectedCustomer}
                     onChange={(e) => setSelectedCustomer(e.target.value)}
                   >
