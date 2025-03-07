@@ -24,7 +24,7 @@ import { VscReferences } from "react-icons/vsc";
 import { Check } from "lucide-react"
 import { AutoComplete } from 'antd';
 import { Form, Input, Button as AntButton } from "antd";
-function OrderModal({ order, isOpen, onOpenChange,setSelectedOrder,fetchOrders }) {
+function OrderModal({ isDark,order, isOpen, onOpenChange,setSelectedOrder,fetchOrders }) {
   const {isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure(); // For delete confirmation
   const { isOpen: isCustomerDetailsOpen, onOpen: onCustomerDetailsOpen, onClose: onCustomerDetailsClose } = useDisclosure();
   const { products,customers } = useHubs();
@@ -216,11 +216,11 @@ function OrderModal({ order, isOpen, onOpenChange,setSelectedOrder,fetchOrders }
 
   return (
     <div>
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false}  className="dark " size="4xl">
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false}  className={` ${isDark?"dark":"light"}`} size="4xl">
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className="flex flex-col p-2 pl-4 pt-4 text-base "><div className="reletive">Order Details <p className={`absolute left-32 top-4 ${order.orderPriority==="Normal"?"text-green-500":"text-red-900"}`}>{order.orderPriority}</p></div> </ModalHeader>
+            <ModalHeader className="flex flex-col p-2 pl-4 pt-4 text-base "><div className={`${isDark?"":"text-gray-900"} reletive`}>Order Details <p className={`absolute left-32 top-4 ${order.orderPriority==="Normal"?"text-green-500":"text-red-900"}`}>{order.orderPriority}</p></div> </ModalHeader>
             <ModalBody style={{ minHeight: '520px' }}>
   <Tabs aria-label="Order Tabs" className="flex justify-center">
     <Tab key="general" title="General">
@@ -441,6 +441,7 @@ function OrderModal({ order, isOpen, onOpenChange,setSelectedOrder,fetchOrders }
   <div>
   <OrderItems 
                         order={order} 
+                        isDark={isDark}
                         getCustomerName2={getCustomerName2} 
                         products={products} 
                         handleUpdateOrder={handleUpdateOrder}
@@ -480,9 +481,9 @@ function OrderModal({ order, isOpen, onOpenChange,setSelectedOrder,fetchOrders }
         order.comment
           .sort((a, b) => new Date(b.creationdate) - new Date(a.creationdate))
           .map((comment, index) => (
-            <div key={index} className="mb-2 border rounded-xl p-3 bg-zinc-950">
-              <p className="text-gray-200">{comment.text}</p>
-              <p className="text-xs text-gray-500">{new Date(comment.creationdate).toLocaleString()}</p>
+            <div key={index} className={`mb-2 border rounded-xl p-3 ${isDark?" bg-zinc-950":" bg-white"}`}>
+              <p className={`${isDark?"text-gray-200":"text-gray-800"} `}>{comment.text}</p>
+              <p className={`text-xs text-gray-500`}>{new Date(comment.creationdate).toLocaleString()}</p>
             </div>
           ))
       ) : (
@@ -508,10 +509,10 @@ function OrderModal({ order, isOpen, onOpenChange,setSelectedOrder,fetchOrders }
     </Modal>
 
     {isDeleteOpen && (
-          <Modal isOpen={isDeleteOpen} onOpenChange={onDeleteClose} className="dark">
+          <Modal isOpen={isDeleteOpen} onOpenChange={onDeleteClose} className={` ${isDark?"dark":"light"}`}>
             <ModalContent>
-              <ModalHeader className="flex flex-col gap-1">Confirm Deletion</ModalHeader>
-              <ModalBody>
+              <ModalHeader className={` ${isDark?"":"text-gray-900"} flex flex-col gap-1`}>Confirm Deletion</ModalHeader>
+              <ModalBody className={` ${isDark?"":"text-gray-900"} `}>
                 <p>Are you sure you want to delete this order? This action cannot be undone.</p>
               </ModalBody>
               <ModalFooter>

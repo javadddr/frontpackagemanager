@@ -19,7 +19,7 @@ import { EditIcon } from "./EditIcon";
 import BulkPro from "./BulkPro";
 const { Option } = Select;
 const MotionButton = motion(Button);
-const Inventory = ({productStats}) => {
+const Inventory = ({productStats,isDark}) => {
   const { hubs, fetchHubs,setHubs } = useHubs();
   const { vendors, fetchVendors,setVendors } = useHubs();
   const { products, fetchProducts,setProducts } = useHubs();
@@ -226,7 +226,7 @@ const [success, setSuccess] = useState(false);
     }
   };
   return (
-    <div className="pt-6 pl-4 pr-4 pb-10 bg-zinc-900" style={{ minHeight: "100vh"}}>
+    <div className={`pt-6 pl-4 pr-4 pb-10 ${isDark?"bg-zinc-900":"bg-white"} `} style={{ minHeight: "100vh"}}>
    
    <div className='flex items-end justify-end mb-3  w-full '>
    <div className="flex flex-col  items-center mr-3">
@@ -659,7 +659,7 @@ const [success, setSuccess] = useState(false);
   <div className="gap-2 grid grid-cols-2 sm:grid-cols-4 pt-10 ml-[7%] mr-[7%]">
    
     {products.map((product, index) => (
-           <Card key={product._id} shadow="sm"  className="dark border "  >
+           <Card key={product._id} shadow="sm"  className={`${isDark?"dark border":"light"}  `} >
         
         <CardBody className="overflow-visible p-0 relative">
         {productStats.remaining[product.name]?.currentInventory < product.reorderLevel && (

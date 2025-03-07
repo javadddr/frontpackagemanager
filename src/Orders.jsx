@@ -22,7 +22,7 @@ const MotionButton = motion(Button);
 
 
 
-function Orders() {
+function Orders({isDark}) {
 
   const [form] = Form.useForm();
   const { customers,products,orders,setOrders, fetchOrders} = useHubs();
@@ -166,7 +166,7 @@ const handleFormSubmit = async (values) => {
 
 
   return (
-    <div className="pt-6 pl-4 pr-4 bg-zinc-900" style={{ minHeight: "100vh"}}>
+    <div className={`pt-6 pl-4 pr-4  ${isDark?"bg-zinc-900":"bg-white"} `} style={{ minHeight: "100vh"}}>
     <div className="flex justify-end">
       <div>
        <MotionButton
@@ -524,7 +524,7 @@ const handleFormSubmit = async (values) => {
 
 
        <div>
-       <OrderDown/>
+       <OrderDown isDark={isDark}/>
        </div>
        </div>
   )

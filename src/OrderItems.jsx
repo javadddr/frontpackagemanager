@@ -6,7 +6,7 @@ import { FaSitemap } from "react-icons/fa";
 import { AutoComplete, Input } from 'antd'; 
 import { Check } from "lucide-react"
 
-function OrderItems({ order, getCustomerName2, products, handleUpdateOrder, setFormData, formData }) {
+function OrderItems({ isDark,order, getCustomerName2, products, handleUpdateOrder, setFormData, formData }) {
   const [editingItemIndex, setEditingItemIndex] = useState(null); // Track which item is being edited
   const [itemInputs, setItemInputs] = useState(order.items.map(() => '')); // For item name input
   const [localQuantities, setLocalQuantities] = useState(order.items.map(item => item.quantity)); // Local state to track quantity changes
@@ -103,14 +103,14 @@ function OrderItems({ order, getCustomerName2, products, handleUpdateOrder, setF
     <div>
       <div className="flex items-center w-full text-gray-300 font-mono text-sm mb-2">
         <FaSitemap className="mr-1 text-blue-500" size={16} />
-        <span className="text-gray-100 font-semibold">Items:</span>
+        <span className={`${isDark?"text-gray-100":"text-gray-400"}  font-semibold`}>Items:</span>
       </div>
       {formData.items && formData.items.length > 0 ? (
         <div className="max-h-[200px] overflow-y-auto">
           {formData.items.map((item, index) => (
             <Card
               key={index}
-              className="bg-gray-800 text-white rounded-lg  shadow-lg mb-4"
+              className={`${isDark?"bg-gray-800 text-white":"bg-gray-300 text-black"}   rounded-lg  shadow-lg mb-4`}
             >
               <CardBody>
                 {editingItemIndex === index ? (

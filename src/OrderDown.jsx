@@ -5,7 +5,7 @@ import {SearchIcon} from "./SearchIcon";
 import OrderModal from "./OrderModal";
 const statusOrder = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Canceled'];
 
-function OrderDown() {
+function OrderDown({isDark}) {
   const { orders, setOrders,products,shipments, fetchOrders,customers } = useHubs();
   const [statusPipelines, setStatusPipelines] = useState({
     'Pending': [],
@@ -188,48 +188,53 @@ const handleCardClick = (order) => {
 
   return (
     <div>
-         <div className="mb-4 mt-4 flex justify-end items-end ml-[85%]">
-          <Input
-  isClearable
-  radius="lg"
-  style={{color:"white"}}
-  classNames={{
-  
-    input: [
-      "bg-gray-800",
-      "text-base", // Changed to white and larger text
-      "flex",
- 
-    ],
-    innerWrapper: "bg-transparent",
-    inputWrapper: [
-      "shadow-md",
-      "bg-default-800/50",
-      "dark:bg-default/60",
-      "backdrop-blur-xl",
-      "backdrop-saturate-200",
-      
-      "group-data-[focus=true]:bg-default-600/50",
-      "dark:group-data-[focus=true]:bg-default/60",
-      "group-data-[hover=true]:bg-default-600/50",
-      "dark:group-data-[hover=true]:bg-default/60",
-      "!cursor-text",
-      "max-w-[240px]",
-
-    ],
-  }}
-  placeholder="Type to search..."
-  onClear={() => setSearchTerm('')}
-  value={searchTerm}
-  onChange={(e) => setSearchTerm(e.target.value)}
-  startContent={
-    <SearchIcon className="w-5 h-5 text-white pointer-events-none flex-shrink-0" />
-  }
-/>
-      
-
-      </div>
-    <div className="bg-zinc-900  p-1">
+        
+         <div className="mb-4 mt-4 flex justify-end items-end ml-[85%] max-h-[32px]">
+            <Input
+              isClearable
+              radius="lg"
+              style={{ color: isDark ? "white" : "black" }}
+              classNames={{
+                label: "text-white/90 dark:text-black/90 h-[32px]", // Adjusted to match height
+                input: [
+                  "bg-gray-800",
+                  "text-sm", // Reduced from text-base to ensure text fits (16px -> 14px)
+                  "flex",
+                  "h-[32px]", // Keep input height
+                  "leading-[28px]", // Slightly less than height to allow space and prevent overlap
+                  "py-0", // No vertical padding
+                ],
+                innerWrapper: "bg-transparent h-[32px] py-0 flex items-center", // Center content vertically
+                inputWrapper: [
+                  "shadow-sm",
+                  "bg-default-200/50",
+                  "dark:bg-default/60",
+                  "backdrop-blur-xl",
+                  "backdrop-saturate-200",
+                  "group-data-[focus=true]:bg-default-200/50",
+                  "dark:group-data-[focus=true]:bg-default/60",
+                  "group-data-[hover=true]:bg-default-400/50",
+                  "dark:group-data-[hover=true]:bg-default/60",
+                  "!cursor-text",
+                  "max-w-[300px]",
+                  "h-[32px]", // Wrapper height
+                  "min-h-[32px]", // Minimum height
+                  "py-0", // No padding
+                  "flex items-center", // Ensure vertical centering
+                ],
+              }}
+              placeholder="Type to search..."
+              onClear={() => setSearchTerm("")}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              startContent={
+                <SearchIcon
+                  className={`w-3 h-3 ${isDark ? "text-white" : "text-black"} pointer-events-none flex-shrink-0`}
+                />
+              }
+            />
+          </div>
+    <div className={`${isDark?"bg-zinc-900":"bg-white"}   p-1`}>
   
       <div className="flex justify-between mb-1 ">
         {statusOrder.map((status) => (
@@ -259,7 +264,7 @@ const handleCardClick = (order) => {
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, status)}
        
-            className="flex-1 min-w-[200px] bg-gray-800 rounded-lg border border-gray-600 h-[620px] overflow-y-auto overflow-x-hidden p-1 scrollbar-hide"
+            className={`flex-1 min-w-[200px] ${isDark?"bg-gray-800 border border-gray-600":"bg-gray-100 border border-gray-200"}  rounded-lg  h-[620px] overflow-y-auto overflow-x-hidden p-1 scrollbar-hide`}
           >
             {statusPipelines[status].filter(filterCards).map((order) => (
               <div  onClick={() => handleCardClick(order)}>
@@ -268,7 +273,7 @@ const handleCardClick = (order) => {
                 draggable={status !== 'Shipped' && status !== 'Delivered'}
                 onDragStart={(e) => handleDragStart(e, order)}
                 radius="sm"
-                className={`dark mt-2 shadow-3xl z-50 relative ${new Date(order.fulfillmentTime) < new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) && order.status !== 'Canceled' ? 'bg-red-200  text-black' : ''} `}
+                className={` ${isDark?"dark":"light"} mt-2 shadow-3xl z-50 relative ${new Date(order.fulfillmentTime) < new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) && order.status !== 'Canceled' ? 'bg-red-200  text-black' : ''} `}
                 style={{
                   userSelect: "none",
                   cursor: status !== 'Shipped' && status !== 'Delivered' ? 'pointer' : 'default',
@@ -291,7 +296,7 @@ const handleCardClick = (order) => {
         ))}
       </div>
     </div>
-    {selectedOrder && <OrderModal order={selectedOrder} isOpen={isOpen} onOpenChange={onOpenChange} setSelectedOrder={setSelectedOrder} fetchOrders={fetchOrders}/>}
+    {selectedOrder && <OrderModal isDark={isDark} order={selectedOrder} isOpen={isOpen} onOpenChange={onOpenChange} setSelectedOrder={setSelectedOrder} fetchOrders={fetchOrders}/>}
     </div>
   );
 }
