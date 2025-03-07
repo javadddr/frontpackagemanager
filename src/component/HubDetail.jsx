@@ -14,7 +14,7 @@ import Hdashboard from "./Hdashboard";
 import Hgeneral from "./Hgeneral";
 import Hproduct from "./Hproduct";
 
-export default function HubDetail({ isOpen, onClose, hubs, hubid }) {
+export default function HubDetail({isDark, isOpen, onClose, hubs, hubid }) {
   const [activeTab, setActiveTab] = useState("general");
 
   // Find the hub with the matching ID
@@ -32,13 +32,13 @@ export default function HubDetail({ isOpen, onClose, hubs, hubid }) {
   const renderTabContent = () => {
     switch (activeTab) {
       case "general":
-        return <Hgeneral hub={hub} hubid={hubid} />;
+        return <Hgeneral isDark={isDark} hub={hub} hubid={hubid} />;
       case "products":
-        return <Hproduct hub={hub} hubid={hubid} />;
+        return <Hproduct isDark={isDark} hub={hub} hubid={hubid} />;
       case "comments":
-        return <Hcomment hub={hub} hubid={hubid} />;
+        return <Hcomment isDark={isDark} hub={hub} hubid={hubid} />;
       case "dashboard":
-        return <Hdashboard hub={hub}  hubid={hubid}/>;
+        return <Hdashboard isDark={isDark} hub={hub}  hubid={hubid}/>;
       default:
         return null;
     }
@@ -64,9 +64,9 @@ export default function HubDetail({ isOpen, onClose, hubs, hubid }) {
           },
         },
       },
-    }} size="4xl" className="dark">
+    }} size="4xl" className={`${isDark?"dark":"light"}`}>
       <ModalContent>
-        <ModalHeader className="text-center text-lg font text-gray-300">
+        <ModalHeader className={`text-center text-lg font ${isDark?"text-gray-300":"text-gray-900"} `}>
           {hub.name}{" "}
           <span
             className={`ml-2 px-0 -leading-1 py-0 rounded-md  ${

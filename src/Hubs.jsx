@@ -21,7 +21,7 @@ import {
 
 const MotionButton = motion(Button);
 
-function Hubs() {
+function Hubs({isDark}) {
   const {isOpen, onOpen, onClose} = useDisclosure();
   const [isModalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -206,7 +206,7 @@ const [comments, setComments] = useState([{ text: '', creationdate: new Date() }
 
   return (
  
-    <div className="pt-6 pl-4 pr-4 bg-zinc-900" style={{ minHeight: "100vh"}}>
+    <div className={`pt-6 pl-4 pr-4 ${isDark?"bg-zinc-900":"bg-white"} `} style={{ minHeight: "100vh"}}>
    <div className="flex justify-end">
       <MotionButton
         color="primary"
@@ -451,7 +451,7 @@ const [comments, setComments] = useState([{ text: '', creationdate: new Date() }
                 setSelectedHubId(hub._id);
                 onOpen();
               }}
-              className="w-full dark border"
+              className={`w-full ${isDark?"dark":"light"} border`}
             >
               <CardBody style={{ display: "flex", justifyContent: "space-between" }}>
                 <div className="flex">
@@ -493,7 +493,7 @@ const [comments, setComments] = useState([{ text: '', creationdate: new Date() }
   )}
 </div>
 )}
-<HubDetail isOpen={isOpen} onClose={onClose} hubs={hubs} hubid={selectedHubId}/>
+<HubDetail isDark={isDark} isOpen={isOpen} onClose={onClose} hubs={hubs} hubid={selectedHubId}/>
     </div>
     
   );

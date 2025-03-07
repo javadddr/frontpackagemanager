@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@nextui-org/react';
 import { useHubs } from '../HubsContext';
 import Com from "../cop.jpeg"
-function Hcomment({ hubid, hub }) {
+function Hcomment({ isDark,hubid, hub }) {
   const [comments, setComments] = useState(hub.comment || []);
   const [newComment, setNewComment] = useState('');
   const [isAddingComment, setIsAddingComment] = useState(false);
@@ -80,15 +80,15 @@ function Hcomment({ hubid, hub }) {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          className="mb-4 p-0 bg-gray-100 rounded-lg bg-zinc-900"
+          className={`mb-4 p-0 bg-gray-100 rounded-lg ${isDark?"bg-zinc-900":"bg-white"} `}
         >
           <textarea 
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Write your comment here..."
-            className="w-full h-20 mb-2 p-2 rounded-lg text-gray-400"
+            className="w-full h-20 mb-2 p-2 rounded-lg text-gray-400 border"
           />
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end space-x-2 ">
             <Button 
               size="sm" 
               color="success" 
@@ -119,7 +119,7 @@ function Hcomment({ hubid, hub }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="mb-4 p-4  rounded-lg shadow bg-zinc-400"
+              className={`mb-4 p-4 rounded-lg shadow ${isDark?"bg-zinc-400":"bg-zinc-100"} `}
              
             >
               <p className="text-sm text-black">{comment.text}</p>

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Input } from '@nextui-org/react';
 import { useHubs } from '../HubsContext';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
-function Hgeneral({ hubid, hub }) {
+function Hgeneral({isDark, hubid, hub }) {
   // Use the hub prop directly instead of initializing with useState
   const [editingField, setEditingField] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -98,7 +98,7 @@ function Hgeneral({ hubid, hub }) {
       transition={{ duration: 0.1 }}
     >
       <div className='text-gray-400 mb-5'>
-        <b className='text-gray-200'>Created At:</b> {new Date(localHub.createdAt).toLocaleString('en-GB', { 
+        <b className={`${isDark?"text-gray-200":"text-gray-800"} `}>Created At:</b> {new Date(localHub.createdAt).toLocaleString('en-GB', { 
           day: 'numeric', 
           month: 'short', 
           year: 'numeric', 
@@ -107,12 +107,12 @@ function Hgeneral({ hubid, hub }) {
         }).replace(',', '')}
       </div>
       <div className='text-gray-400 mb-2'>
-        <b className='text-gray-200'>Name:</b> 
+        <b className={`${isDark?"text-gray-200":"text-gray-800"} `}>Name:</b> 
         <b className='text-gray-400 ml-3'>{localHub.name}</b> 
       </div>
       {[ 'address', 'email'].map(field => (
         <div key={field} className="mb-2 text-gray-400 ">
-          <b className='text-gray-200 mr-3'>{field.charAt(0).toUpperCase() + field.slice(1)}:</b>
+          <b className={`mr-3 ${isDark?"text-gray-200":"text-gray-800"} `}>{field.charAt(0).toUpperCase() + field.slice(1)}:</b>
           {editingField === field ? (
             <div className="flex items-center space-x-2 ">
               <Input 
@@ -145,7 +145,7 @@ function Hgeneral({ hubid, hub }) {
       ))}
 
       <div className="mb-4 text-gray-400">
-        <b className='mr-3 text-gray-200'>Alert:</b>
+        <b className={`mr-3 ${isDark?"text-gray-200":"text-gray-800"} `}>Alert:</b>
         {editingField === 'alert' ? (
           <div className="flex items-center space-x-2 text-gray-300  ">
             <select 
@@ -193,11 +193,11 @@ function Hgeneral({ hubid, hub }) {
         Delete Hub
       </Button>
 
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange} className='dark'>
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange} className={`${isDark?"dark":"light"} `}>
         <ModalContent>
-          <ModalHeader className="flex flex-col gap-1 text-gray-300">Confirm Deletion</ModalHeader>
+          <ModalHeader className={`${isDark?"text-gray-300":"text-gray-900"} flex flex-col gap-1  `}>Confirm Deletion</ModalHeader>
           <ModalBody>
-            <p className='text-gray-400'>Are you sure you want to delete this hub? This action cannot be undone.</p>
+            <p className={`${isDark?"text-gray-400":"text-gray-800"} `}>Are you sure you want to delete this hub? This action cannot be undone.</p>
             {deleteError && <p className="text-red-500">{deleteError}</p>}
           </ModalBody>
           <ModalFooter>
