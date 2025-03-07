@@ -637,7 +637,7 @@ function ShipDown2({ shipments,isDark, returnVen, fetchShipments }) {
       </div>
         )}
         </div>
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} className='dark'>
+        <Modal isOpen={isOpen} onOpenChange={onOpenChange} className={`${isDark?"dark ":"light text-gray-900"}`}>
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">Confirm Deletion</ModalHeader>
         <ModalBody>
